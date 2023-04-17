@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "db-migrate": "^0.11.13",
+    "db-migrate-mysql": "^2.2.0",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "hbs": "^4.2.0",
+    "mysql": "^2.18.1",
+    "wax-on": "^1.2.2"
+  },
+  "name": "project-3-express",
+  "description": "To start mysql, in the terminal, type in `mysql -u root`",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db-migrate": "node ./node_modules/db-migrate/bin/db-migrate"
+  },
+  "author": "",
+  "license": "ISC"
+}
