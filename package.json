@@ -17,5 +17,6 @@
     "db-migrate": "node ./node_modules/db-migrate/bin/db-migrate"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {}
 }
