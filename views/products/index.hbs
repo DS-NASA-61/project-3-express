@@ -5,8 +5,12 @@
         <tr>
             <th>ID</th>
             <th>Name</th>
+            <th>Age</th>
             <th>Cost</th>
+            <th>Strength</th>
+            <th>Volume</th>
             <th>Description</th>
+            <th>Stock</th>
             <th></th>
         </tr>
     </thead>
@@ -20,10 +24,22 @@
                 {{this.name}}
             </td>
             <td>
+                {{this.age}}
+            </td>
+            <td>
                 {{this.cost}}
             </td>
             <td>
+                {{this.strength}}
+            </td>
+            <td>
+                {{this.volume}}
+            </td>
+            <td>
                 {{this.description}}
+            </td>
+            <td>
+                {{this.stock}}
             </td>
             <td>
                 <a href="/products/{{this.id}}/update" class="btn btn-primary btn-sm">Update</a>

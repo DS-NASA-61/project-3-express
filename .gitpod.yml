@@ -1,2 +1,7 @@
+
 image:
   file: .gitpod.dockerfile
+vscode:
+  extensions:
+    - cweijan.vscode-database-client2
+    - cweijan.vscode-mysql-client2

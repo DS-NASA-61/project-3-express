@@ -33,7 +33,7 @@ async function main() {
   app.use('/', landingRoutes);
 
   // If the URL begins with /products, then use productRoutes
-//   app.use('/products', productRoutes)
+  app.use('/products', productRoutes)
   
 }
 
