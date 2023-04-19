@@ -3,6 +3,9 @@ const forms = require("forms");
 // create some shortcuts
 const fields = forms.fields;
 const validators = forms.validators;
+const widgets = forms.widgets;
+//import validatorjs
+const validator = require ('validator')
 
 var bootstrapField = function (name, object) {
     if (!Array.isArray(object.widget.classes)) { object.widget.classes = []; }
@@ -24,7 +27,7 @@ var bootstrapField = function (name, object) {
     return '<div class="form-group">' + label + widget + error + '</div>';
 };
 
-const createProductForm = () => {
+const createProductForm = (categories=[]) => {
     // the only arugment to forms.create is an object
     // each key defines one field in the form (one input element)
     // the value describes the form element
@@ -46,7 +49,12 @@ const createProductForm = () => {
         "strength": fields.number({
             required: true,
             errorAfterField: true,
-            validators:[validators.decimal(5, 2)]
+            validators:[function (form, field, callback) {
+                if (!validator.isDecimal(String(field.data))) {
+                  return callback('Strength must be a decimal number.');
+                }
+                callback();
+              }]
         }),
         "volume": fields.number({
             required: true,
@@ -63,6 +71,14 @@ const createProductForm = () => {
             errorAfterField: true,
             validators:[validators.integer()]
         }),
+        "category_id": fields.string({
+            label:'Category',
+            required:true,
+            errorAfterField:true,
+            widget:widgets.select(),
+            choices:categories
+
+        })
     
     })
 }

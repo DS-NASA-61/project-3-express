@@ -9,6 +9,7 @@
     "hbs": "^4.2.0",
     "knex": "^2.4.2",
     "mysql": "^2.18.1",
+    "validator": "^13.9.0",
     "wax-on": "^1.2.2"
   },
   "name": "project-3-express",

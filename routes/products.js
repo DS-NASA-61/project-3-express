@@ -1,31 +1,41 @@
 const express = require('express');
-const { Product } = require('../models');
+const { Product, Category } = require('../models');
 const { createProductForm, bootstrapField } = require('../forms');
+const { getAllCategories, createNewProduct, getProductById } = require('../dal/products');
 const router = express.Router();
 
 
 router.get('/', async(req,res)=>{
     // .collection() -- access all the rows
     // .fetch() -- execute the query
-    const products = await Product.collection().fetch();
+    const products = await Product.collection().fetch({
+        withRelated:['category']
+    });
    
     // if we want the results to be in an array of objects form
     // we have to call .toJSON on the results
     res.render('products/index',{
-        'products': products.toJSON()
+        'products': products.toJSON()   
     })
 })
 
+// --- create ---
+// render form
 router.get('/create', async(req,res)=>{
-    const form = createProductForm();
+    const allCategories = await getAllCategories();
+    // createProductForm defined in forms taking in argument categories=[]
+    const form = createProductForm(allCategories);
     res.render('products/create', {
         'form': form.toHTML(bootstrapField)
     })
 })
 
+// process submitted form
 router.post('/create', async(req,res)=>{
-    // use caolan form to handle the request
-    const form = createProductForm();
+
+    const allCategories = await getAllCategories();
+    
+    const form = createProductForm(allCategories);
     form.handle(req,{
         "success": async (form) => {
             // if the form has no errors
@@ -34,12 +44,8 @@ router.post('/create', async(req,res)=>{
             // if we create a new instance of a model
             // const x = new ModelX();
             // then the x refers to ONE ROW IN THE TABLE
-            const product = new Product();  // creating a new row in the Product table
-            product.set('name', form.data.name);
-            product.set('cost', form.data.cost);
-            product.set('description', form.data.description);
-            // remember to save
-            await product.save();
+            // use the form data to create a new instance of the Product model, and then save it.
+            const product = await createNewProduct(form.data);
             res.redirect('/products');
 
         },
@@ -60,30 +66,34 @@ router.post('/create', async(req,res)=>{
 })
 
 router.get('/:productId/update', async(req,res)=>{
-    // fetch one row using Bookshelf
-    const product = await Product.where({
-        "id": req.params.productId
-    }).fetch({
-        'require': true
-    });
 
-    const productForm = createProductForm();
+     // fetch all the categories
+     const allCategories = await getAllCategories();
+
+    // fetch one row using Bookshelf
+    const product = await getProductById(req.params.productId);
+    
+    const productForm = createProductForm(allCategories);
     productForm.fields.name.value = product.get('name');
+    productForm.fields.age.value = product.get('age');
     productForm.fields.cost.value = product.get('cost');
+    productForm.fields.strength.value = product.get('strength');
+    productForm.fields.volume.value = product.get('volume');
     productForm.fields.description.value = product.get('description')
+    productForm.fields.stock.value = product.get('stock');
+    productForm.fields.category_id.value = product.get('category_id');
 
     res.render('products/update',{
+        'product': product.toJSON(),
         'form': productForm.toHTML(bootstrapField)
     });
 })
 
 router.post('/:productId/update', async function(req,res){
-    const productForm = createProductForm();
-    const product = await Product.where({
-        'id': req.params.productId
-    }).fetch({
-        'required': true
-    })
+    // fetch all the categories
+    const allCategories = await getAllCategories();
+    const productForm = createProductForm(allCategories);
+    const product = await getProductById(req.params.productId);
     productForm.handle(req,{
         "success": async(form) => {
             product.set(form.data);
