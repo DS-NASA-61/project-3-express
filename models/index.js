@@ -8,5 +8,9 @@ const Product = bookshelf.model('Product',{
     "tableName":"products"  // indicate the table that this product is linked to
 });
 
+const Category = bookshelf.model('Category',{
+    "tableName":"categories"
+})
 
-module.exports = { Product }
+
+module.exports = { Product, Category }

@@ -3,6 +3,9 @@ const forms = require("forms");
 // create some shortcuts
 const fields = forms.fields;
 const validators = forms.validators;
+//import validatorjs
+const validator = require ('validator')
+
 
 var bootstrapField = function (name, object) {
     if (!Array.isArray(object.widget.classes)) { object.widget.classes = []; }
@@ -46,7 +49,12 @@ const createProductForm = () => {
         "strength": fields.number({
             required: true,
             errorAfterField: true,
-            validators:[validators.decimal(5, 2)]
+            validators:[function (form, field, callback) {
+                if (!validator.isDecimal(String(field.data))) {
+                  return callback('Strength must be a decimal number.');
+                }
+                callback();
+              }]
         }),
         "volume": fields.number({
             required: true,

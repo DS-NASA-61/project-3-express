@@ -9,6 +9,7 @@
     "hbs": "^4.2.0",
     "knex": "^2.4.2",
     "mysql": "^2.18.1",
+    "validator": "^13.9.0",
     "wax-on": "^1.2.2"
   },
   "name": "project-3-express",
@@ -17,7 +18,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "db-migrate": "node ./node_modules/db-migrate/bin/db-migrate"
+    "db-migrate": "node ./node_modules/db-migrate/bin/db-migrate",
+    "start": "nodemon --ignore sessions"
   },
   "author": "",
   "license": "ISC",
