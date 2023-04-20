@@ -55,12 +55,14 @@ router.post('/create', async (req, res) => {
             if (form.data.flavor_profiles) {
                 product.flavor_profiles().attach(form.data.flavor_profiles.split(','))
             }
-            console.log('form.data.flavor_profiles', form.data.flavor_profiles)
+            
+            req.flash("success_messages", `New Product ${product.get('name')} has been created`)
             res.redirect('/products');
 
         },
         "empty": async (form) => {
             // if the form is empty (no data provided)
+            req.flash('error', 'Form cannot be empty.');
             res.render('products/create', {
                 'form': form.toHTML(bootstrapField)
             });
@@ -68,6 +70,7 @@ router.post('/create', async (req, res) => {
         },
         "error": async (form) => {
             // if the form has errors in validation 
+            req.flash('error', 'Form has errors.');
             res.render('products/create', {
                 'form': form.toHTML(bootstrapField)
             })
