@@ -6,7 +6,8 @@ const knex = require('knex')({
         "password":process.env.DB_PASSWORD,
         "database":process.env.DB_DATABASE,
         "host":process.env.DB_HOST
-    }
+    },
+    // debug: true,
 });
 
 // setting up bookshelf

@@ -4,25 +4,35 @@ const bookshelf = require('../bookshelf');
 // A Bookshelf Model represents one table in your database
 
 // the first parameter: the name of the Model
-const Product = bookshelf.model('Product',{
+const Product = bookshelf.model('Product', {
     // indicate the table that this product is linked to
-    tableName:"products",  
+    tableName: "products",
     // relationships in Bookshelf are defined via functions
     // the name of the function is the name of the relationship
-    category(){
+    category() {
         // one Product model belongs to one Category model
         return this.belongsTo('Category')
+    },
+    flavor_profiles() {
+        return this.belongsToMany('Flavor_Profile');
     }
 });
 
-const Category = bookshelf.model('Category',{
-    "tableName":"categories",
+const Category = bookshelf.model('Category', {
+    tableName: "categories",
     // for the relationship to work in Bookshelf, the foregin key column must be
     // <singular_form_of_table>_id
-    products(){
+    products() {
         return this.hasMany('Product')
     }
 })
 
+const Flavor_Profile = bookshelf.model('Flavor_Profile', {
+    tableName: "flavor_profiles",
+    products() {
+        return this.belongsToMany("Product");
+    }
+})
 
-module.exports = { Product , Category}
+
+module.exports = { Product, Category, Flavor_Profile }

@@ -12,6 +12,7 @@
             <th>Volume</th>
             <th>Description</th>
             <th>Stock</th>
+            <th>Flavor Profile</th>
             <th></th>
         </tr>
     </thead>
@@ -44,6 +45,11 @@
             </td>
             <td>
                 {{this.stock}}
+            </td>
+            <td>
+                {{#each flavor_profiles}}
+                   <span class="badge bg-primary"> {{name}}</span>
+                {{/each}}
             </td>
             <td>
                 <a href="/products/{{this.id}}/update" class="btn btn-primary btn-sm">Update</a>

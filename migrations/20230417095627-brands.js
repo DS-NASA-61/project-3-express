@@ -29,7 +29,7 @@ exports.up = function(db) {
       notNull: true
     },
     brand_logo: {
-      type: 'string',
+      type: 'string', 
       length: 2048
     },
     thumbnail_url: {

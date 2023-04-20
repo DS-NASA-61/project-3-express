@@ -1,11 +1,18 @@
 const async = require('hbs/lib/async');
-const { Category, Product } = require('../models');
+const { Category, Product, Flavor_Profile } = require('../models');
 
 async function getAllCategories(){
     const allCategories = (await Category.fetchAll()).map((category)=>{
         return [category.get('id'), category.get('name')];
     })
     return allCategories;
+}
+
+async function getAllFlavorProfile(){
+    const allFlavoProfiles = await Flavor_Profile.fetchAll().map(flavor_profile=>{
+        return [flavor_profile.get('id'),flavor_profile.get('name')]
+    })
+    return allFlavoProfiles;
 }
 
 async function createNewProduct(productData){
@@ -28,15 +35,26 @@ async function getProductById(id){
         "id":id
     }).fetch({
         requied:true,
-        //tags and category models are fetched and returned along with the main Product model.
+        //flavor_profiles and category models are fetched and returned along with the main Product model.
         //as they are the name of the relationship
-        withRelated:['category']
+        withRelated:['category','flavor_profiles']
     })
     return product
 }
 
+async function updateProduct(product, productData) {
+    product.set(productData);
+    await product.save();
+    return product;
+}
+
+
+
+
 module.exports = {
     getAllCategories,
     createNewProduct,
-    getProductById
+    getProductById,
+    getAllFlavorProfile,
+    updateProduct
 }

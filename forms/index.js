@@ -27,7 +27,7 @@ var bootstrapField = function (name, object) {
     return '<div class="form-group">' + label + widget + error + '</div>';
 };
 
-const createProductForm = (categories=[]) => {
+const createProductForm = (categories=[], flavor_profiles=[]) => {
     // the only arugment to forms.create is an object
     // each key defines one field in the form (one input element)
     // the value describes the form element
@@ -77,7 +77,13 @@ const createProductForm = (categories=[]) => {
             errorAfterField:true,
             widget:widgets.select(),
             choices:categories
-
+        }),
+        "flavor_profiles":fields.string({
+            label:'Flavor_Profile',
+            required:true,
+            errorAfterField: true,
+            widget:widgets.multipleSelect(),
+            choices:flavor_profiles
         })
     
     })
