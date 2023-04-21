@@ -89,5 +89,57 @@ const createProductForm = (categories=[], flavor_profiles=[]) => {
     })
 }
 
-module.exports = { bootstrapField,createProductForm }
+const createRegistrationForm  = ()=>{
+    return forms.create({
+        'first_name':fields.string({
+            required:true,
+            errorAfterField:true,
+            validators:[validators.maxlength(45)]
+        }),
+        'last_name':fields.string({
+            required:true,
+            errorAfterField:true,
+            validators:[validators.maxlength(45)]
+        }),
+        'email':fields.email({
+            required: true,
+            errorAfterField: true,
+            validators:[validators.email()]
+        }),
+        'username': fields.string({
+            required:true,
+            errorAfterField:true,
+            validators:[validators.maxlength(20)]
+        }),
+        'password': fields.password({
+            required:validators.required('You definitely want a password'),
+            errorAfterField:true,
+            validators:[validators.maxlength(100)]
+        }),
+        'confirm_password':fields.password({
+            label: 'Confirm your password',
+            required: validators.required('Please enter your password again'),
+            validators: [validators.matchField('password')]
+        }),
+        'contact_number': fields.string({
+            required:false,
+            errorAfterField:true,
+        }),
+    })
+}
+
+const createLoginForm = () =>{
+    return forms.create({
+        'email': fields.email({
+            required:true,
+            errorAfterField:true,
+        }),
+        'password': fields.password({
+            required:true,
+            errorAfterField:true,
+        })
+    })
+}
+
+module.exports = { bootstrapField,createProductForm, createRegistrationForm, createLoginForm }
 

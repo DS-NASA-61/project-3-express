@@ -56,7 +56,7 @@ router.post('/create', async (req, res) => {
                 product.flavor_profiles().attach(form.data.flavor_profiles.split(','))
             }
             
-            req.flash("success_messages", `New Product ${product.get('name')} has been created`)
+            req.flash('success', 'Product created successfully!');
             res.redirect('/products');
 
         },
