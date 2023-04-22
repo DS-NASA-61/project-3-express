@@ -1,0 +1,28 @@
+{{#extends 'base'}}
+
+{{#block 'subtitle'}}
+Profile
+{{/block}}
+
+{{#block 'content'}}
+
+<div class="container-profile mt-5">
+    <div class="profile-box">
+      <h4>User Profile</h4>
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong class="profile-field-header">Name:</strong> {{user.first_name}} {{user.last_name}}</p>
+          <p><strong class="profile-field-header">Username:</strong> {{user.username}}</p>
+          <p><strong class="profile-field-header">Email:</strong> {{user.email}}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong class="profile-field-header">Contact Number:</strong> {{user.contact_number}}</p>
+          {{!-- <p><strong class="profile-field-header">Account Type:</strong> {{user.role.role}}</p> --}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+{{/block}}
+
+{{/extends}}

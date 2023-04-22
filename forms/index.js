@@ -5,7 +5,7 @@ const fields = forms.fields;
 const validators = forms.validators;
 const widgets = forms.widgets;
 //import validatorjs
-const validator = require ('validator')
+const validator = require('validator')
 
 var bootstrapField = function (name, object) {
     if (!Array.isArray(object.widget.classes)) { object.widget.classes = []; }
@@ -27,12 +27,12 @@ var bootstrapField = function (name, object) {
     return '<div class="form-group">' + label + widget + error + '</div>';
 };
 
-const createProductForm = (categories=[], flavor_profiles=[]) => {
+const createProductForm = (categories = [], flavor_profiles = []) => {
     // the only arugment to forms.create is an object
     // each key defines one field in the form (one input element)
     // the value describes the form element
     return forms.create({
-        
+
         "name": fields.string({
             required: true,
             errorAfterField: true,
@@ -44,22 +44,22 @@ const createProductForm = (categories=[], flavor_profiles=[]) => {
         "cost": fields.number({
             required: true,
             errorAfterField: true,
-            validators:[validators.integer()]
+            validators: [validators.integer()]
         }),
         "strength": fields.number({
             required: true,
             errorAfterField: true,
-            validators:[function (form, field, callback) {
+            validators: [function (form, field, callback) {
                 if (!validator.isDecimal(String(field.data))) {
-                  return callback('Strength must be a decimal number.');
+                    return callback('Strength must be a decimal number.');
                 }
                 callback();
-              }]
+            }]
         }),
         "volume": fields.number({
             required: true,
             errorAfterField: true,
-            validators:[validators.integer()]
+            validators: [validators.integer()]
         }),
         "description": fields.string({
             required: true,
@@ -69,77 +69,82 @@ const createProductForm = (categories=[], flavor_profiles=[]) => {
         "stock": fields.number({
             required: true,
             errorAfterField: true,
-            validators:[validators.integer()]
+            validators: [validators.integer()]
         }),
         "category_id": fields.string({
-            label:'Category',
-            required:true,
-            errorAfterField:true,
-            widget:widgets.select(),
-            choices:categories
-        }),
-        "flavor_profiles":fields.string({
-            label:'Flavor_Profile',
-            required:true,
+            label: 'Category',
+            required: true,
             errorAfterField: true,
-            widget:widgets.multipleSelect(),
-            choices:flavor_profiles
+            widget: widgets.select(),
+            choices: categories
+        }),
+        "flavor_profiles": fields.string({
+            label: 'Flavor_Profile',
+            required: true,
+            errorAfterField: true,
+            widget: widgets.multipleSelect(),
+            choices: flavor_profiles
         })
-    
+
     })
 }
 
-const createRegistrationForm  = ()=>{
+const createRegistrationForm = () => {
     return forms.create({
-        'first_name':fields.string({
-            required:true,
-            errorAfterField:true,
-            validators:[validators.maxlength(45)]
-        }),
-        'last_name':fields.string({
-            required:true,
-            errorAfterField:true,
-            validators:[validators.maxlength(45)]
-        }),
-        'email':fields.email({
+        'first_name': fields.string({
             required: true,
             errorAfterField: true,
-            validators:[validators.email()]
+            validators: [validators.maxlength(45)]
+        }),
+        'last_name': fields.string({
+            required: true,
+            errorAfterField: true,
+            validators: [validators.maxlength(45)]
+        }),
+        'email': fields.email({
+            required: true,
+            errorAfterField: true,
+            validators: [validators.email()]
         }),
         'username': fields.string({
-            required:true,
-            errorAfterField:true,
-            validators:[validators.maxlength(20)]
+            required: true,
+            errorAfterField: true,
+            validators: [validators.maxlength(20)]
         }),
         'password': fields.password({
-            required:validators.required('You definitely want a password'),
-            errorAfterField:true,
-            validators:[validators.maxlength(100)]
+            required: validators.required('You definitely want a password'),
+            errorAfterField: true,
+            validators: [validators.maxlength(100)]
         }),
-        'confirm_password':fields.password({
+        'confirm_password': fields.password({
             label: 'Confirm your password',
             required: validators.required('Please enter your password again'),
             validators: [validators.matchField('password')]
         }),
         'contact_number': fields.string({
-            required:false,
-            errorAfterField:true,
+            required: false,
+            errorAfterField: true,
         }),
     })
 }
 
-const createLoginForm = () =>{
+const createLoginForm = () => {
     return forms.create({
         'email': fields.email({
-            required:true,
-            errorAfterField:true,
+            required: true,
+            errorAfterField: true,
         }),
         'password': fields.password({
-            required:true,
-            errorAfterField:true,
+            required: true,
+            errorAfterField: true,
         })
     })
 }
 
-module.exports = { bootstrapField,createProductForm, createRegistrationForm, createLoginForm }
+module.exports =
+{
+    bootstrapField, createProductForm,
+    createRegistrationForm,
+    createLoginForm
+}
 

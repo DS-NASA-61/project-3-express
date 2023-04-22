@@ -80,23 +80,31 @@ router.post('/create', async (req, res) => {
 
 router.get('/:productId/update', async (req, res) => {
 
-    // fetch all the categories
+    // fetch all the categories and flaovr profiles
     const allCategories = await getAllCategories();
-
     const allFlavoProfiles = await getAllFlavorProfile();
 
     // fetch one row using Bookshelf
     const product = await getProductById(req.params.productId);
 
+    // fetch productForm object with the necessary fields
     const productForm = createProductForm(allCategories, allFlavoProfiles);
-    productForm.fields.name.value = product.get('name');
-    productForm.fields.age.value = product.get('age');
-    productForm.fields.cost.value = product.get('cost');
-    productForm.fields.strength.value = product.get('strength');
-    productForm.fields.volume.value = product.get('volume');
-    productForm.fields.description.value = product.get('description')
-    productForm.fields.stock.value = product.get('stock');
-    productForm.fields.category_id.value = product.get('category_id');
+
+    // //get the productForm : the hard way
+    // productForm.fields.name.value = product.get('name');
+    // productForm.fields.age.value = product.get('age');
+    // productForm.fields.cost.value = product.get('cost');
+    // productForm.fields.strength.value = product.get('strength');
+    // productForm.fields.volume.value = product.get('volume');
+    // productForm.fields.description.value = product.get('description')
+    // productForm.fields.stock.value = product.get('stock');
+    // productForm.fields.category_id.value = product.get('category_id');
+
+    // get the productForm : the simplified way -- using a loop
+    const fieldToGet = ['name', 'age', 'cost', 'strength', 'volume', 'description', 'stock', 'category_id'];
+    fieldToGet.forEach(field => {
+        productForm.fields[field].value = product.get(field);
+    })
 
     // get all the selected flavor profiles of the product
     // 'pluck' function only exists for bookshelf -- extracts out one key and put into an array
