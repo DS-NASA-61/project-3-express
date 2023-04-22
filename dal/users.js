@@ -1,3 +1,4 @@
+const async = require('hbs/lib/async');
 const {User} = require ('../models');
 const { getHashedPassword } = require('../utilities');
 
@@ -26,4 +27,24 @@ const createNewUser = async (userData) => {
     return user;
 }
 
-module.exports = {getUserbyEmail, createNewUser}
+// const getUserById = async (userId) =>{
+//     const user = await User.where({
+//         id: userId
+//     }).fetch({
+//         require: true,
+//         // withRelated: ['role']
+//     });
+//     return user;
+// }
+
+const getUserById = async function (userId) {
+	const user = await User.where({
+		id: userId
+	}).fetch({
+		require: true,
+		// withRelated: ['role']
+	});
+	return user;
+}
+
+module.exports = {getUserbyEmail, createNewUser, getUserById}

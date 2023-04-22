@@ -2,6 +2,7 @@ const express = require('express');
 const { Product, Category } = require('../models');
 const { createProductForm, bootstrapField } = require('../forms');
 const { getAllCategories, createNewProduct, getProductById, getAllFlavorProfile, updateProduct } = require('../dal/products');
+const { checkIfAuthenticated } = require('../middlewares');
 const router = express.Router();
 
 
@@ -20,8 +21,12 @@ router.get('/', async (req, res) => {
 })
 
 // --- create ---
+// placing checkIfAuthenticated as the second argument 
+// of router.post() and router.get() methods, so it's executed before the 
+// route handler, allowing the function to check if the user 
+// is authenticated before allowing access to the route.
 // render form
-router.get('/create', async (req, res) => {
+router.get('/create', checkIfAuthenticated,async (req, res) => {
     const allCategories = await getAllCategories();
     const allFlavoProfiles = await getAllFlavorProfile();
     // createProductForm defined in forms taking in argument categories=[]
@@ -32,7 +37,7 @@ router.get('/create', async (req, res) => {
 })
 
 // process submitted form
-router.post('/create', async (req, res) => {
+router.post('/create', checkIfAuthenticated, async (req, res) => {
 
     const allCategories = await getAllCategories();
     const allFlavoProfiles = await getAllFlavorProfile();

@@ -45,13 +45,25 @@ app.use(session({
 app.use(flash());
 
 // use our own custom middleware to extract flash messages
+// by setting properties on res.locals (in 
+// this case `success` and `errors` event),
+// properties will be available to all views that are 
+// rendered after this middleware function has been executed.
+// and now since the middleware function is mounted globally using 
+// app.use() with no path specified. it will be executed for 
+// every incoming HTTP request before any other middleware functions or route handlers.
 app.use(function (req, res, next) {
   res.locals.successes = req.flash('success');
   res.locals.errors = req.flash('error')
   next();
 });
 
-
+// this global middleware is to add user data across all hbs files
+// sets the user property of res.locals to the user property of req.session
+app.use(function (req, res, next) {
+  res.locals.user = req.session.user;
+  next();
+});
 // import in the router
 // if we want to require our own files, we have to begin with "./"
 const landingRoutes = require('./routes/landing.js');
@@ -73,6 +85,6 @@ async function main() {
 
 main();
 
-app.listen(3000, () => {
+app.listen(process.env.PORT || 3000, () => {
   console.log("Server has started");
 });

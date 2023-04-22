@@ -1,39 +1,40 @@
 const express = require('express');
 const { createLoginForm, createRegistrationForm, bootstrapField } = require('../forms');
-const { getUserbyEmail, createNewUser } = require('../dal/users');
+const { getUserbyEmail, createNewUser, getUserById } = require('../dal/users');
 const { getHashedPassword } = require('../utilities');
+const { checkIfAuthenticated } = require('../middlewares');
 const async = require('hbs/lib/async');
 const router = express.Router();
 
 
 
 // ---user signup---
-router.get('/signup',function(req,res){
+router.get('/signup', function (req, res) {
     const form = createRegistrationForm();
-    res.render("users/signup",{
-        'form':form.toHTML(bootstrapField)
+    res.render("users/signup", {
+        'form': form.toHTML(bootstrapField)
     })
 })
 
-router.post('/signup', (req, res) =>{
+router.post('/signup', (req, res) => {
     const form = createRegistrationForm();
-    
+
     form.handle(req, {
-        'success': async function(form){
-            const {confirm_password, ...userData} = form.data;
+        'success': async function (form) {
+            const { confirm_password, ...userData } = form.data;
             const user = await createNewUser(userData);
 
             req.flash('success', 'Your account has been created!');
             res.redirect('/users/login');
         },
-        "empty": async function(form) {
-            res.render('users/signup',{
+        "empty": async function (form) {
+            res.render('users/signup', {
                 'form': form.toHTML(bootstrapField)
             })
         },
-        'error': async function(form) {
-            res.render('users/signup',{
-                'form':form.toHTML(bootstrapField)
+        'error': async function (form) {
+            res.render('users/signup', {
+                'form': form.toHTML(bootstrapField)
             })
         }
     })
@@ -78,20 +79,20 @@ router.post("/login", (req, res) => {
                     res.redirect('/users/profile')
                 } else {
                     req.flash('error', 'Unable to authenticate your details'),
-                    res.redirect("/users/login")
+                        res.redirect("/users/login")
                 }
             }
         },
 
-        'empty': async function(form){
-            res.render('users/login',{
-                form:form.toHTML(bootstrapField)
+        'empty': async function (form) {
+            res.render('users/login', {
+                form: form.toHTML(bootstrapField)
             })
         },
 
-        'error': async function(form){
-            res.render('users/login',{
-                form:form.toHTML(bootstrapField)
+        'error': async function (form) {
+            res.render('users/login', {
+                form: form.toHTML(bootstrapField)
             })
         }
 
@@ -99,19 +100,34 @@ router.post("/login", (req, res) => {
 })
 
 // ---user profile---
-router.get('/profile', function(req,res){
+router.get('/profile', function (req, res) {
     const user = req.session.user;
-    res.render('users/profile',{
-        user:user
+    res.render('users/profile', {
+        user: user
     })
 })
 
 // ---user logout---
-router.get('/logout', function(req,res){
-  
+router.get('/logout', function (req, res) {
+
     req.session.user = null;
     req.flash('success', "Bye!");
     res.redirect('/users/login');
+})
+
+// ---view all users---
+router.get('/view', checkIfAuthenticated, async function (req, res) {
+    const userId = req.session.user.id;
+    try {
+        const user = await getUserById(userId);
+        res.render('users/profile',{
+            user : user.toJSON(),
+        });
+    } catch (error) {
+        console.log(error);
+        req.flash('error_messages', 'An error occurred while retrieving account information. Please try again');
+        res.redirect('/users/view');
+    }
 })
 
 
