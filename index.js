@@ -35,7 +35,7 @@ app.use(
 // setup sessions
 app.use(session({
   'store': new FileStore(),
-  'secret': 'keyboard cat',
+  'secret': process.env.SESSION_SECRET_KEY,
   'resave': false,
   'saveUninitialized': true
 }))
@@ -48,20 +48,32 @@ app.use(flash());
 
 // enable csrf (after enabling sessions)
 // EVERY POST ROUTE (every app.post or router.post) will be protected by CSRF
-// app.use(csrf());
+app.use(csrf());
 
 // use our own proxy mdidleware to initialize csrf selectively
 // (i.e so that we can exclude certain routes from csrf)
 // because routes use other means of authentication (e.g.JWT tokens) and do not need CSRF protection.?
-const csrfInstance = csrf();
-app.use(function(req, res, next){
-  if(req.url == "/checkout/process_payment" || req.url.slice(0,5) === "/api/"){
-    next(); // to exempt the route from CSRF
-  } else{
-    // enable csrf for requests that does not access the payment
-    csrfInstance(req, res, next)
+// const csrfInstance = csrf();
+// app.use(function(req, res, next){
+//   if(req.url == "/checkout/process_payment" || req.url.slice(0,5) === "/api/"){
+//     next(); // to exempt the route from CSRF
+//   } else{
+//     // enable csrf for requests that does not access the payment
+//     csrfInstance(req, res, next)
+//   }
+// })
+
+// this middleware is to handle invalid csrf tokens errors
+// make sure to put this immediately after the app.use(csrf())
+app.use(function (err, req, res, next) {
+  // the error parameter is to handle errors
+  if (err && err.code === "EBADCSRFTOKEN") {
+    req.flash('error', "The form has expired. Please try again");
+    res.redirect('back'); // go back in history one step
+  } else {
+    next();
   }
-})
+});
 
 // once csfr is initialized, csrfToken() method will be ready to use to generate token
 //share CSRF token with hbs files

@@ -3,6 +3,7 @@
 {{#block "content"}}
 <form method="POST">
     {{{form}}}
+    <input type="hidden" name="_csrf" value="{{csrfToken}}"/>
     <input type="submit" value="Create"/>
 </form>
 {{/block}}
