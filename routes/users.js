@@ -1,8 +1,11 @@
 const express = require('express');
 const { createLoginForm, createRegistrationForm, bootstrapField } = require('../forms');
 const { getUserbyEmail, createNewUser } = require('../dal/users');
+const { getHashedPassword } = require('../utilities');
 const async = require('hbs/lib/async');
 const router = express.Router();
+
+
 
 // ---user signup---
 router.get('/signup',function(req,res){
@@ -61,7 +64,7 @@ router.post("/login", (req, res) => {
                     res.redirect("/users/login")
             } else {
                 // 2. check pw
-                if (user.get('password') === form.data.password) {
+                if (user.get('password') === getHashedPassword(form.data.password)) {
                     // 3. if all matches, save user info into session
                     req.session.user = {
                         id: user.get('id'),
@@ -101,6 +104,14 @@ router.get('/profile', function(req,res){
     res.render('users/profile',{
         user:user
     })
+})
+
+// ---user logout---
+router.get('/logout', function(req,res){
+  
+    req.session.user = null;
+    req.flash('success', "Bye!");
+    res.redirect('/users/login');
 })
 
 

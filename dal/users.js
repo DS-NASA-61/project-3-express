@@ -1,4 +1,5 @@
-const {User} = require ('../models')
+const {User} = require ('../models');
+const { getHashedPassword } = require('../utilities');
 
 const getUserbyEmail = async (email)=>{
     const user = await User.where({
@@ -16,6 +17,7 @@ const createNewUser = async (userData) => {
     // otherwise the userData won't contain the dates
     userData.created_date = new Date();
     userData.modified_date  = new Date();
+    userData.password = getHashedPassword(userData.password);
 
     // create a new User object. 
     const user = new User(userData);
