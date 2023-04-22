@@ -3,6 +3,7 @@ const hbs = require("hbs");
 const wax = require("wax-on");
 const session = require('express-session');
 const flash = require('connect-flash');
+const csrf = require('csurf')
 
 // FileStore for storing the session
 const FileStore = require('session-file-store')(session);
@@ -44,6 +45,31 @@ app.use(session({
 // so we setup after sessions
 app.use(flash());
 
+
+// enable csrf (after enabling sessions)
+// EVERY POST ROUTE (every app.post or router.post) will be protected by CSRF
+// app.use(csrf());
+
+// use our own proxy mdidleware to initialize csrf selectively
+// (i.e so that we can exclude certain routes from csrf)
+// because routes use other means of authentication (e.g.JWT tokens) and do not need CSRF protection.?
+const csrfInstance = csrf();
+app.use(function(req, res, next){
+  if(req.url == "/checkout/process_payment" || req.url.slice(0,5) === "/api/"){
+    next(); // to exempt the route from CSRF
+  } else{
+    // enable csrf for requests that does not access the payment
+    csrfInstance(req, res, next)
+  }
+})
+
+// once csfr is initialized, csrfToken() method will be ready to use to generate token
+//share CSRF token with hbs files
+app.use(function(req,res,next){
+  res.locals.csrfToken = req.csrfToken();
+  next();
+})
+
 // use our own custom middleware to extract flash messages
 // by setting properties on res.locals (in 
 // this case `success` and `errors` event),
@@ -58,12 +84,16 @@ app.use(function (req, res, next) {
   next();
 });
 
+
+
 // this global middleware is to add user data across all hbs files
 // sets the user property of res.locals to the user property of req.session
 app.use(function (req, res, next) {
   res.locals.user = req.session.user;
   next();
 });
+
+
 // import in the router
 // if we want to require our own files, we have to begin with "./"
 const landingRoutes = require('./routes/landing.js');

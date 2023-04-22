@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "bookshelf": "^1.2.0",
+    "cloudinary": "^1.36.1",
     "connect-flash": "^0.1.1",
+    "csurf": "^1.11.0",
     "db-migrate": "^0.11.13",
     "db-migrate-mysql": "^2.2.0",
     "dotenv": "^16.0.3",
