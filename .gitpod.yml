@@ -4,8 +4,6 @@ image:
 vscode:
   extensions:
     - cweijan.vscode-database-client2
-    - cweijan.vscode-mysql-client2
-tasks:
-  - command: >
-      sleep 3 &&
-      npx json2env < database.json > .env
+  
+
+
