@@ -27,6 +27,12 @@ const Product = bookshelf.model('Product', {
     },
     region(){
         return this.belongsTo('Region')
+    },
+    distillery(){
+        return this.belongsTo('Distillery')
+    },
+    package(){
+        return this.belongsTo('Package')
     }
 });
 
@@ -78,6 +84,20 @@ const Region = bookshelf.model('Region',{
     }
 })
 
+const Distillery = bookshelf.model('Distillery',{
+    tableName: 'distilleries',
+    products() {
+        return this.hasMany('Product')
+    }
+})
+
+const Package = bookshelf.model('Package', {
+    tableName:'packages',
+    products() {
+        return this.hasMany('Product')
+    }
+})
+
 module.exports = { 
     Product, 
     Category, 
@@ -86,5 +106,7 @@ module.exports = {
     Product_Image,
     Brand,
     Country,
-    Region
+    Region,
+    Distillery,
+    Package
 }

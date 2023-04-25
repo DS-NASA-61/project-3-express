@@ -1,5 +1,5 @@
 const async = require('hbs/lib/async');
-const { Category, Product, Flavor_Profile, Product_Image, Brand, Country, Region } = require('../models');
+const { Category, Product, Flavor_Profile, Product_Image, Brand, Country, Region, Distillery, Package } = require('../models');
 
 async function getAllCategories() {
     const allCategories = (await Category.fetchAll()).map((category) => {
@@ -9,10 +9,10 @@ async function getAllCategories() {
 }
 
 async function getAllFlavorProfile() {
-    const allFlavoProfiles = await Flavor_Profile.fetchAll().map(flavor_profile => {
+    const allFlavorProfiles = await Flavor_Profile.fetchAll().map(flavor_profile => {
         return [flavor_profile.get('id'), flavor_profile.get('name')]
     })
-    return allFlavoProfiles;
+    return allFlavorProfiles;
 }
 
 async function createNewProduct(productData) {
@@ -25,6 +25,9 @@ async function createNewProduct(productData) {
     product.set('description', productData.description);
     product.set('stock', productData.stock);
     product.set('category_id', productData.category_id);
+    product.set('brand_id', productData.brand_id);
+    product.set('country_id', productData.country_id);
+    product.set('region_id', productData.region_id);
     // remember to save
     await product.save();
     return product;
@@ -37,7 +40,7 @@ async function getProductById(id) {
         requied: true,
         //flavor_profiles and category models are fetched and returned along with the main Product model.
         //as they are the name of the relationship
-        withRelated: ['category', 'flavor_profiles','country','region']
+        withRelated: ['category', 'flavor_profiles','country','region','distillery','package']
     })
     return product
 }
@@ -77,6 +80,20 @@ async function getAllRegions() {
     return allRegions;
 }
 
+async function getAllDistilleries(){
+    const allDistilleries = await Distillery.fetchAll().map(distillery => {
+        return [distillery.get('id'), distillery.get('name')]
+    })
+    return allDistilleries
+}
+
+async function getAllPackages(){
+    const allPackages = await Package.fetchAll().map(package => {
+        return [package.get('id'), package.get('description')]
+    })
+    return allPackages
+}
+
 
 
 
@@ -89,5 +106,7 @@ module.exports = {
     getProductImage,
     getAllBrandNames,
     getAllCountries,
-    getAllRegions
+    getAllRegions,
+    getAllDistilleries,
+    getAllPackages
 }

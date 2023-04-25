@@ -7,7 +7,7 @@ const widgets = forms.widgets;
 //import validatorjs
 const validator = require('validator')
 
-var bootstrapField = function (name, object) {
+var bootstrapField = function (name, object, colSize = 'col-md-6') {
     if (!Array.isArray(object.widget.classes)) { object.widget.classes = []; }
 
     if (object.widget.classes.indexOf('form-control') === -1) {
@@ -24,96 +24,131 @@ var bootstrapField = function (name, object) {
     var error = object.error ? '<div class="invalid-feedback">' + object.error + '</div>' : '';
 
     var widget = object.widget.toHTML(name, object);
-    return '<div class="form-group">' + label + widget + error + '</div>';
+    return `<div class="${colSize} mb-3">${label}${widget}${error}</div>`;
 };
 
-const createProductForm = (categories=[], flavor_profiles=[], brands=[], countries=[], regions=[]) => {
-    
-    // the only arugment to forms.create is an object
-    // each key defines one field in the form (one input element)
-    // the value describes the form element
-    return forms.create({
-        "brand": fields.string({
-            label: 'Brand',
-            required: true,
-            errorAfterField: true,
-            widget: widgets.select(),
-            choices: brands
-        }),
-        "name": fields.string({
-            required: true,
-            errorAfterField: true,
-        }),
-        "country": fields.string({
-            label: 'Country',
-            required: false,
-            errorAfterField: true,
-            widget: widgets.select({}),
-            choices: countries,
-        }),
-        "region": fields.string({
-            label:'Region',
-            required: false,
-            errorAfterField:true,
-            widget:widgets.select({}),
-            choices: regions,
-        }),
-     
-        "age": fields.number({
-            required: true,
-            errorAfterField: true,
-            validators: [validators.integer()]
-        }),
-        "cost": fields.number({
-            required: true,
-            errorAfterField: true,
-            validators: [validators.integer()]
-        }),
-        "strength": fields.number({
-            required: true,
-            errorAfterField: true,
-            validators: [function (form, field, callback) {
-                if (!validator.isDecimal(String(field.data))) {
-                    return callback('Strength must be a decimal number.');
-                }
-                callback();
-            }]
-        }),
-        "volume": fields.number({
-            required: true,
-            errorAfterField: true,
-            validators: [validators.integer()]
-        }),
-        "description": fields.string({
-            required: true,
-            errorAfterField: true,
-            widget: forms.widgets.textarea()
-        }),
-        "stock": fields.number({
-            required: true,
-            errorAfterField: true,
-            validators: [validators.integer()]
-        }),
-        "category_id": fields.string({
-            label: 'Category',
-            required: true,
-            errorAfterField: true,
-            widget: widgets.select(),
-            choices: categories
-        }),
-        "flavor_profiles": fields.string({
-            label: 'Flavor_Profile',
-            required: true,
-            errorAfterField: true,
-            widget: widgets.multipleSelect(),
-            choices: flavor_profiles
-        }),
-        "image_url": fields.string({
-            'widget': widgets.hidden()
-        })
+const wrapForm = (form) => {
+    return `
+      <div class="row">
+        ${form.toHTML((name, object) => bootstrapField(name, object))}
+      </div>
+    `;
+};
 
-    })
-}
+const createProductForm =
+    (
+        categories = [], 
+        flavor_profiles = [], 
+        brands = [], 
+        countries = [], 
+        regions = [],
+        distilleries = [],
+        packages = [],
+        ) => {
+
+        // the only arugment to forms.create is an object
+        // each key defines one field in the form (one input element)
+        // the value describes the form element
+        return forms.create({
+            "brand": fields.string({
+                label: 'Brand',
+                required: true,
+                errorAfterField: true,
+                widget: widgets.select(),
+                choices: brands
+            }),
+            "name": fields.string({
+                required: true,
+                errorAfterField: true,
+            }),
+            "country": fields.string({
+                label: 'Country',
+                required: true,
+                errorAfterField: true,
+                widget: widgets.select({}),
+                choices: countries,
+            }),
+            "region": fields.string({
+                label: 'Region',
+                required: false,
+                errorAfterField: true,
+                widget: widgets.select({}),
+                choices: regions,
+            }),
+            "category_id": fields.string({
+                label: 'Category',
+                required: true,
+                errorAfterField: true,
+                widget: widgets.select(),
+                choices: categories
+            }),
+            "distillery": fields.string({
+                label: 'Distillery',
+                required: false,
+                errorAfterField: true,
+                widget: widgets.select({}),
+                choices: distilleries,
+            }),
+
+            "age": fields.number({
+                required: true,
+                errorAfterField: true,
+                validators: [validators.integer()]
+            }),
+            "cost": fields.number({
+                required: true,
+                errorAfterField: true,
+                validators: [validators.integer()]
+            }),
+            "strength": fields.number({
+                required: true,
+                errorAfterField: true,
+                validators: [function (form, field, callback) {
+                    if (!validator.isDecimal(String(field.data))) {
+                        return callback('Strength must be a decimal number.');
+                    }
+                    callback();
+                }]
+            }),
+            "volume": fields.number({
+                required: true,
+                errorAfterField: true,
+                validators: [validators.integer()]
+            }),
+            
+            "package": fields.string({
+                label: 'Package',
+                required: false,
+                errorAfterField: true,
+                widget: widgets.select({}),
+                choices: packages,
+            }),
+        
+            "stock": fields.number({
+                required: true,
+                errorAfterField: true,
+                validators: [validators.integer()]
+            }),
+    
+            "flavor_profiles": fields.string({
+                label: 'Flavor_Profile',
+                required: true,
+                errorAfterField: true,
+                widget: widgets.multipleSelect(),
+                choices: flavor_profiles
+            }),
+
+            "description": fields.string({
+                required: true,
+                errorAfterField: true,
+                widget: forms.widgets.textarea()
+            }),
+            "image_url": fields.string({
+                'widget': widgets.hidden()
+            })
+
+        })
+    }
 
 const createRegistrationForm = () => {
     return forms.create({
@@ -169,7 +204,8 @@ const createLoginForm = () => {
 
 module.exports =
 {
-    bootstrapField, 
+    wrapForm,
+    bootstrapField,
     createProductForm,
     createRegistrationForm,
     createLoginForm

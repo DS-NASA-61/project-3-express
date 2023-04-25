@@ -1,6 +1,6 @@
 const express = require('express');
 const { Product, Category, Brand, Country, Region } = require('../models');
-const { createProductForm, bootstrapField } = require('../forms');
+const { createProductForm, bootstrapField, wrapForm  } = require('../forms');
 const { getAllCategories,
     createNewProduct,
     getProductById,
@@ -10,6 +10,8 @@ const { getAllCategories,
     getAllBrandNames,
     getAllCountries,
     getAllRegions,
+    getAllDistilleries,
+    getAllPackages
  } = require('../dal/products');
 const { checkIfAuthenticated } = require('../middlewares');
 const router = express.Router();
@@ -40,14 +42,23 @@ router.get('/create', checkIfAuthenticated, async (req, res) => {
     const allCategories = await getAllCategories();
     const allFlavorProfiles = await getAllFlavorProfile();
     const allBrandNames = await getAllBrandNames();
-    const allProductImage = await getProductImage();
     const allCountries = await getAllCountries();
     const allRegions = await getAllRegions();
+    const allDistilleries = await getAllDistilleries();
+    const allPackages = await getAllPackages();
     // createProductForm defined in forms taking in argument categories=[]
-    const form = createProductForm(allCategories, allFlavorProfiles, allBrandNames, allCountries, allRegions);
+    const form = createProductForm(
+        allCategories, 
+        allFlavorProfiles, 
+        allBrandNames, 
+        allCountries, 
+        allRegions,
+        allDistilleries,
+        allPackages);
 
     res.render('products/create', {
-        'form': form.toHTML(bootstrapField),
+        // 'form': form.toHTML(bootstrapField),
+        'form': wrapForm(form),
         'cloudinaryName': process.env.CLOUDINARY_NAME,
         'cloudinaryApiKey': process.env.CLOUDINARY_API_KEY,
         'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
@@ -64,8 +75,20 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
 
     const allCategories = await getAllCategories();
     const allFlavorProfiles = await getAllFlavorProfile();
+    const allBrandNames = await getAllBrandNames();
+    const allCountries = await getAllCountries();
+    const allRegions = await getAllRegions();
+    const allDistilleries = await getAllDistilleries();
+    const allPackages = await getAllPackages();
 
-    const form = createProductForm(allCategories, allFlavorProfiles);
+    const form = createProductForm(
+        allCategories, 
+        allFlavorProfiles, 
+        allBrandNames, 
+        allCountries, 
+        allRegions,
+        allDistilleries,
+        allPackages);
 
     form.handle(req, {
         "success": async (form) => {
@@ -92,7 +115,7 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
             // if the form is empty (no data provided)
             req.flash('error', 'Form cannot be empty.');
             res.render('products/create', {
-                'form': form.toHTML(bootstrapField)
+                'form': wrapForm(form),
             });
 
         },
@@ -100,7 +123,7 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
             // if the form has errors in validation 
             req.flash('error', 'Form has errors.');
             res.render('products/create', {
-                'form': form.toHTML(bootstrapField)
+                'form': wrapForm(form),
             })
         }
     })
