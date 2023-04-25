@@ -28,10 +28,13 @@ async function createNewProduct(productData) {
     product.set('brand_id', productData.brand_id);
     product.set('country_id', productData.country_id);
     product.set('region_id', productData.region_id);
+    product.set('distillery_id', productData.distillery_id);
+    product.set('package_id', productData.package_id);
     // remember to save
     await product.save();
     return product;
 }
+
 
 async function getProductById(id) {
     const product = await Product.where({
@@ -84,14 +87,14 @@ async function getAllDistilleries(){
     const allDistilleries = await Distillery.fetchAll().map(distillery => {
         return [distillery.get('id'), distillery.get('name')]
     })
-    return allDistilleries
+    return allDistilleries;
 }
 
 async function getAllPackages(){
     const allPackages = await Package.fetchAll().map(package => {
         return [package.get('id'), package.get('description')]
     })
-    return allPackages
+    return allPackages;
 }
 
 

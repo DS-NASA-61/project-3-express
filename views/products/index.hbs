@@ -6,6 +6,7 @@
             <th>ID</th>
             <th>Brand</th>
             <th>Name</th>
+            <th>Distillery</th>
             <th>Country</th>
             <th>Region</th>
             <th>Category</th>
@@ -14,6 +15,7 @@
             <th>Strength</th>
             <th>Volume</th>
             <th>Description</th>
+            <th>Package</th>
             <th>Stock</th>
             <th>Flavor Profile</th>
             <th>Image</th>
@@ -25,11 +27,14 @@
             <td>
                 {{this.id}}
             </td>
-             <td>
+            <td>
                 {{this.brand.brand_name}}
             </td>
-            <td>
+             <td>
                 {{this.name}}
+            </td>
+            <td>
+                {{this.distillery.name}}
             </td>
             <td>
                 {{this.country.country}}
@@ -54,6 +59,9 @@
             </td>
             <td>
                 {{this.description}}
+            </td>
+            <td>
+                {{this.package.description}}
             </td>
             <td>
                 {{this.stock}}

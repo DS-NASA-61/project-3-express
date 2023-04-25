@@ -1,6 +1,6 @@
 const express = require('express');
 const { Product, Category, Brand, Country, Region } = require('../models');
-const { createProductForm, bootstrapField, wrapForm  } = require('../forms');
+const { createProductForm, bootstrapField, wrapForm } = require('../forms');
 const { getAllCategories,
     createNewProduct,
     getProductById,
@@ -12,7 +12,7 @@ const { getAllCategories,
     getAllRegions,
     getAllDistilleries,
     getAllPackages
- } = require('../dal/products');
+} = require('../dal/products');
 const { checkIfAuthenticated } = require('../middlewares');
 const router = express.Router();
 
@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
     // .collection() -- access all the rows
     // .fetch() -- execute the query
     const products = await Product.collection().fetch({
-        withRelated: ['category', 'flavor_profiles']
+        withRelated: ['category', 'flavor_profiles', 'brand', 'country', 'region', 'package', 'distillery']
     });
 
     // if we want the results to be in an array of objects form
@@ -46,12 +46,12 @@ router.get('/create', checkIfAuthenticated, async (req, res) => {
     const allRegions = await getAllRegions();
     const allDistilleries = await getAllDistilleries();
     const allPackages = await getAllPackages();
-    // createProductForm defined in forms taking in argument categories=[]
+
     const form = createProductForm(
-        allCategories, 
-        allFlavorProfiles, 
-        allBrandNames, 
-        allCountries, 
+        allCategories,
+        allFlavorProfiles,
+        allBrandNames,
+        allCountries,
         allRegions,
         allDistilleries,
         allPackages);
@@ -64,9 +64,6 @@ router.get('/create', checkIfAuthenticated, async (req, res) => {
         'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
 
     })
-    console.log('allCountries choices',allCountries.choices)
-    console.log('allRegions choices',allRegions.choices)
-
 
 })
 
@@ -81,14 +78,17 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
     const allDistilleries = await getAllDistilleries();
     const allPackages = await getAllPackages();
 
+
     const form = createProductForm(
-        allCategories, 
-        allFlavorProfiles, 
-        allBrandNames, 
-        allCountries, 
+        allCategories,
+        allFlavorProfiles,
+        allBrandNames,
+        allCountries,
         allRegions,
         allDistilleries,
-        allPackages);
+        allPackages,
+    );
+
 
     form.handle(req, {
         "success": async (form) => {
@@ -100,7 +100,7 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
             // then the x refers to ONE ROW IN THE TABLE
             // use the form data to create a new instance of the Product model, and then save it.
             const product = await createNewProduct(form.data);
-
+            console.log("product:", product)
             // after saving the product, associate the flavor profile with it
             // note: form.data.flavor_profiles is a comma delimited string
             if (form.data.flavor_profiles) {

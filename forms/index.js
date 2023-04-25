@@ -50,7 +50,7 @@ const createProductForm =
         // each key defines one field in the form (one input element)
         // the value describes the form element
         return forms.create({
-            "brand": fields.string({
+            "brand_id": fields.string({
                 label: 'Brand',
                 required: true,
                 errorAfterField: true,
@@ -61,14 +61,14 @@ const createProductForm =
                 required: true,
                 errorAfterField: true,
             }),
-            "country": fields.string({
+            "country_id": fields.string({
                 label: 'Country',
                 required: true,
                 errorAfterField: true,
                 widget: widgets.select({}),
                 choices: countries,
             }),
-            "region": fields.string({
+            "region_id": fields.string({
                 label: 'Region',
                 required: false,
                 errorAfterField: true,
@@ -82,7 +82,7 @@ const createProductForm =
                 widget: widgets.select(),
                 choices: categories
             }),
-            "distillery": fields.string({
+            "distillery_id": fields.string({
                 label: 'Distillery',
                 required: false,
                 errorAfterField: true,
@@ -115,15 +115,14 @@ const createProductForm =
                 errorAfterField: true,
                 validators: [validators.integer()]
             }),
-            
-            "package": fields.string({
+            "package_id": fields.string({
                 label: 'Package',
                 required: false,
                 errorAfterField: true,
                 widget: widgets.select({}),
                 choices: packages,
             }),
-        
+
             "stock": fields.number({
                 required: true,
                 errorAfterField: true,
