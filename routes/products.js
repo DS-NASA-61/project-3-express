@@ -1,7 +1,7 @@
 const express = require('express');
 const { Product, Category } = require('../models');
 const { createProductForm, bootstrapField } = require('../forms');
-const { getAllCategories, createNewProduct, getProductById, getAllFlavorProfile, updateProduct } = require('../dal/products');
+const { getAllCategories, createNewProduct, getProductById, getAllFlavorProfile, updateProduct, getProductImage, getAllBrandNames } = require('../dal/products');
 const { checkIfAuthenticated } = require('../middlewares');
 const router = express.Router();
 
@@ -26,14 +26,20 @@ router.get('/', async (req, res) => {
 // route handler, allowing the function to check if the user 
 // is authenticated before allowing access to the route.
 // render form
-router.get('/create', checkIfAuthenticated,async (req, res) => {
+router.get('/create', checkIfAuthenticated, async (req, res) => {
     const allCategories = await getAllCategories();
     const allFlavoProfiles = await getAllFlavorProfile();
+    const allBrandNames = await getAllBrandNames();
+    const allProductImage = await getProductImage();
     // createProductForm defined in forms taking in argument categories=[]
-    const form = createProductForm(allCategories, allFlavoProfiles);
+    const form = createProductForm(allCategories, allFlavoProfiles, allBrandNames, allProductImage);
     res.render('products/create', {
-        'form': form.toHTML(bootstrapField)
+        'form': form.toHTML(bootstrapField),
+        'cloudinaryName': process.env.CLOUDINARY_NAME,
+        'cloudinaryApiKey': process.env.CLOUDINARY_API_KEY,
+        'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
     })
+    
 })
 
 // process submitted form
@@ -60,7 +66,7 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
             if (form.data.flavor_profiles) {
                 product.flavor_profiles().attach(form.data.flavor_profiles.split(','))
             }
-            
+
             req.flash('success', 'Product created successfully!');
             res.redirect('/products');
 
@@ -143,7 +149,7 @@ router.post('/:productId/update', async function (req, res) {
             let toRemove = existingFlavorProfiles.filter(t => incomingFlavorProfiles.includes(t) === false);
             await product.flavor_profiles().detach(toRemove);
             // find flavor_profiles to add
-            let toAdd = incomingFlavorProfiles.filter(t=>existingFlavorProfiles.includes(t) === false);
+            let toAdd = incomingFlavorProfiles.filter(t => existingFlavorProfiles.includes(t) === false);
             await product.flavor_profiles().attach(toAdd)
 
             res.redirect('/products');

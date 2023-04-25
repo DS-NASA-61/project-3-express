@@ -4,6 +4,7 @@
     <thead>
         <tr>
             <th>ID</th>
+            <th>Brand</th>
             <th>Name</th>
             <th>Category</th>
             <th>Age</th>
@@ -13,7 +14,7 @@
             <th>Description</th>
             <th>Stock</th>
             <th>Flavor Profile</th>
-            <th></th>
+            <th>Image</th>
         </tr>
     </thead>
     <tbody>
@@ -21,6 +22,9 @@
         <tr>
             <td>
                 {{this.id}}
+            </td>
+             <td>
+                {{this.brand.brand_name}}
             </td>
             <td>
                 {{this.name}}
@@ -50,6 +54,11 @@
                 {{#each flavor_profiles}}
                    <span class="badge bg-primary"> {{name}}</span>
                 {{/each}}
+            </td>
+            <td>
+                {{#if image_url}}
+                    <img src="{{image_url}}" class="img-fluid"/>
+                {{/if}}
             </td>
             <td>
                 <a href="/products/{{this.id}}/update" class="btn btn-primary btn-sm">Update</a>

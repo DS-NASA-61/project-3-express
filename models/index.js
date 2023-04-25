@@ -15,6 +15,12 @@ const Product = bookshelf.model('Product', {
     },
     flavor_profiles() {
         return this.belongsToMany('Flavor_Profile');
+    },
+    brand(){
+        return this.belongsTo('Brand')
+    },
+    product_image(){
+        return this.hasMany('Product_Image')
     }
 });
 
@@ -39,7 +45,24 @@ const User = bookshelf.model('User',{
 })
 
 const Product_Image = bookshelf.model('Product_Image',{
-    tableName:'product_images'
+    tableName:'product_images',
+    products() {
+        return this.belongsTo('Product')
+    }
 })
 
-module.exports = { Product, Category, Flavor_Profile, User, Product_Image }
+const Brand = bookshelf.model('Brand',{
+    tableName:'brands',
+    products() {
+        return this.hasMany('Product')
+    }
+})
+
+module.exports = { 
+    Product, 
+    Category, 
+    Flavor_Profile, 
+    User, 
+    Product_Image,
+    Brand 
+}

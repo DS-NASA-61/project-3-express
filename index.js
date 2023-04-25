@@ -111,6 +111,7 @@ app.use(function (req, res, next) {
 const landingRoutes = require('./routes/landing.js');
 const productRoutes = require('./routes/products.js');
 const userRoutes = require('./routes/users.js');
+const cloudinaryRoutes = require('./routes/cloudinary.js');
 
 async function main() {
   // make use of the landing page routes
@@ -123,6 +124,7 @@ async function main() {
    // If the URL begins with /users, then use the userRoutes
    app.use('/users', userRoutes);
   
+   app.use('/cloudinary',cloudinaryRoutes );
 }
 
 main();
