@@ -1,5 +1,5 @@
 const async = require('hbs/lib/async');
-const { Category, Product, Flavor_Profile, Product_Image, Brand } = require('../models');
+const { Category, Product, Flavor_Profile, Product_Image, Brand, Country, Region } = require('../models');
 
 async function getAllCategories() {
     const allCategories = (await Category.fetchAll()).map((category) => {
@@ -37,7 +37,7 @@ async function getProductById(id) {
         requied: true,
         //flavor_profiles and category models are fetched and returned along with the main Product model.
         //as they are the name of the relationship
-        withRelated: ['category', 'flavor_profiles']
+        withRelated: ['category', 'flavor_profiles','country','region']
     })
     return product
 }
@@ -63,6 +63,22 @@ async function getAllBrandNames() {
     return allBrandNames;
 }
 
+async function getAllCountries() {
+    const allCountries =(await Country.fetchAll()).map(country=>{
+        return [country.get('id'), country.get('country')]
+    })
+    return allCountries;
+}
+
+async function getAllRegions() {
+    const allRegions =(await Region.fetchAll()).map(region => {
+        return [region.get('id'), region.get('region')]
+    })
+    return allRegions;
+}
+
+
+
 
 module.exports = {
     getAllCategories,
@@ -71,5 +87,7 @@ module.exports = {
     getAllFlavorProfile,
     updateProduct,
     getProductImage,
-    getAllBrandNames
+    getAllBrandNames,
+    getAllCountries,
+    getAllRegions
 }

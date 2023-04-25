@@ -21,6 +21,12 @@ const Product = bookshelf.model('Product', {
     },
     product_image(){
         return this.hasMany('Product_Image')
+    },
+    country(){
+        return this.belongsTo('Country')
+    },
+    region(){
+        return this.belongsTo('Region')
     }
 });
 
@@ -58,11 +64,27 @@ const Brand = bookshelf.model('Brand',{
     }
 })
 
+const Country = bookshelf.model('Country',{
+    tableName:'countries',
+    products() {
+        return this.hasMany('Product')
+    }
+})
+
+const Region = bookshelf.model('Region',{
+    tableName:'regions',
+    products() {
+        return this.hasMany('Product')
+    }
+})
+
 module.exports = { 
     Product, 
     Category, 
     Flavor_Profile, 
     User, 
     Product_Image,
-    Brand 
+    Brand,
+    Country,
+    Region
 }

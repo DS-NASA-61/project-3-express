@@ -1,7 +1,16 @@
 const express = require('express');
-const { Product, Category } = require('../models');
+const { Product, Category, Brand, Country, Region } = require('../models');
 const { createProductForm, bootstrapField } = require('../forms');
-const { getAllCategories, createNewProduct, getProductById, getAllFlavorProfile, updateProduct, getProductImage, getAllBrandNames } = require('../dal/products');
+const { getAllCategories,
+    createNewProduct,
+    getProductById,
+    getAllFlavorProfile,
+    updateProduct,
+    getProductImage,
+    getAllBrandNames,
+    getAllCountries,
+    getAllRegions,
+ } = require('../dal/products');
 const { checkIfAuthenticated } = require('../middlewares');
 const router = express.Router();
 
@@ -27,28 +36,36 @@ router.get('/', async (req, res) => {
 // is authenticated before allowing access to the route.
 // render form
 router.get('/create', checkIfAuthenticated, async (req, res) => {
+
     const allCategories = await getAllCategories();
-    const allFlavoProfiles = await getAllFlavorProfile();
+    const allFlavorProfiles = await getAllFlavorProfile();
     const allBrandNames = await getAllBrandNames();
     const allProductImage = await getProductImage();
+    const allCountries = await getAllCountries();
+    const allRegions = await getAllRegions();
     // createProductForm defined in forms taking in argument categories=[]
-    const form = createProductForm(allCategories, allFlavoProfiles, allBrandNames, allProductImage);
+    const form = createProductForm(allCategories, allFlavorProfiles, allBrandNames, allCountries, allRegions);
+
     res.render('products/create', {
         'form': form.toHTML(bootstrapField),
         'cloudinaryName': process.env.CLOUDINARY_NAME,
         'cloudinaryApiKey': process.env.CLOUDINARY_API_KEY,
         'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
+
     })
-    
+    console.log('allCountries choices',allCountries.choices)
+    console.log('allRegions choices',allRegions.choices)
+
+
 })
 
 // process submitted form
 router.post('/create', checkIfAuthenticated, async (req, res) => {
 
     const allCategories = await getAllCategories();
-    const allFlavoProfiles = await getAllFlavorProfile();
+    const allFlavorProfiles = await getAllFlavorProfile();
 
-    const form = createProductForm(allCategories, allFlavoProfiles);
+    const form = createProductForm(allCategories, allFlavorProfiles);
 
     form.handle(req, {
         "success": async (form) => {
@@ -93,13 +110,13 @@ router.get('/:productId/update', async (req, res) => {
 
     // fetch all the categories and flaovr profiles
     const allCategories = await getAllCategories();
-    const allFlavoProfiles = await getAllFlavorProfile();
+    const allFlavorProfiles = await getAllFlavorProfile();
 
     // fetch one row using Bookshelf
     const product = await getProductById(req.params.productId);
 
     // fetch productForm object with the necessary fields
-    const productForm = createProductForm(allCategories, allFlavoProfiles);
+    const productForm = createProductForm(allCategories, allFlavorProfiles);
 
     // //get the productForm : the hard way
     // productForm.fields.name.value = product.get('name');
