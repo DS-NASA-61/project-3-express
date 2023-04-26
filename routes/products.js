@@ -1,5 +1,5 @@
 const express = require('express');
-const { Product, Category, Brand, Country, Region } = require('../models');
+const { Product, Category, Brand, Country, Region, Product_Image } = require('../models');
 const { createProductForm, bootstrapField, wrapForm } = require('../forms');
 const { getAllCategories,
     createNewProduct,
@@ -7,11 +7,13 @@ const { getAllCategories,
     getAllFlavorProfile,
     updateProduct,
     getProductImage,
+    getProductThumbnail,
     getAllBrandNames,
     getAllCountries,
     getAllRegions,
     getAllDistilleries,
-    getAllPackages
+    getAllPackages,
+    createNewProductImage
 } = require('../dal/products');
 const { checkIfAuthenticated } = require('../middlewares');
 const router = express.Router();
@@ -21,8 +23,10 @@ router.get('/', async (req, res) => {
     // .collection() -- access all the rows
     // .fetch() -- execute the query
     const products = await Product.collection().fetch({
-        withRelated: ['category', 'flavor_profiles', 'brand', 'country', 'region', 'package', 'distillery']
+        withRelated: ['category', 'flavor_profiles', 'brand', 'country', 'region', 'package', 'distillery', 'product_image']
     });
+
+    console.log("products-->", products.toJSON())
 
     // if we want the results to be in an array of objects form
     // we have to call .toJSON on the results
@@ -46,6 +50,8 @@ router.get('/create', checkIfAuthenticated, async (req, res) => {
     const allRegions = await getAllRegions();
     const allDistilleries = await getAllDistilleries();
     const allPackages = await getAllPackages();
+    const allProductImages = await getProductImage();
+    const allProductThumbnails = await getProductThumbnail();
 
     const form = createProductForm(
         allCategories,
@@ -54,7 +60,9 @@ router.get('/create', checkIfAuthenticated, async (req, res) => {
         allCountries,
         allRegions,
         allDistilleries,
-        allPackages);
+        allPackages,
+        allProductImages,
+        allProductThumbnails);
 
     res.render('products/create', {
         // 'form': form.toHTML(bootstrapField),
@@ -77,6 +85,8 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
     const allRegions = await getAllRegions();
     const allDistilleries = await getAllDistilleries();
     const allPackages = await getAllPackages();
+    const allProductImages = await getProductImage();
+    const allProductThumbnails = await getProductThumbnail();
 
 
     const form = createProductForm(
@@ -87,43 +97,70 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
         allRegions,
         allDistilleries,
         allPackages,
+        allProductImages,
+        allProductThumbnails
     );
 
 
     form.handle(req, {
         "success": async (form) => {
-            // if the form has no errors
-            // to access the data in the form, we use form.data
+            try {
+                // if the form has no errors
+                // to access the data in the form, we use form.data
 
-            // if we create a new instance of a model
-            // const x = new ModelX();
-            // then the x refers to ONE ROW IN THE TABLE
-            // use the form data to create a new instance of the Product model, and then save it.
-            const product = await createNewProduct(form.data);
-            console.log("product:", product)
-            // after saving the product, associate the flavor profile with it
-            // note: form.data.flavor_profiles is a comma delimited string
-            if (form.data.flavor_profiles) {
-                product.flavor_profiles().attach(form.data.flavor_profiles.split(','))
+                // if we create a new instance of a model
+                // const x = new ModelX();
+                // then the x refers to ONE ROW IN THE TABLE
+                // use the form data to create a new instance of the Product model, and then save it.
+                const product = await createNewProduct(form.data);
+                console.log("form.data:", form.data)
+                // after saving the product, associate the flavor profile with it
+                // note: form.data.flavor_profiles is a comma-separated string of 
+                // flavor profile IDs that were selected in the form when creating a new product.
+                // The attach() method is used to add a new relationship between the 
+                // Product model and one or more FlavorProfile models. and is for many to 
+                // many relationship
+
+                if (form.data.image_url) {
+                    const productImage = await createNewProductImage(form.data.image_url, form.data.thumbnail_url, product.id)
+                    await productImage.save({ product_id: product.id }, { patch: true });
+                    console.log("productImage", productImage)
+                    console.log("product.id", product.id)
+                }
+
+
+                if (form.data.flavor_profiles) {
+                    product.flavor_profiles().attach(form.data.flavor_profiles.split(','))
+                }
+
+                req.flash('success', 'Product created successfully!');
+                res.redirect('/products');
+            } catch (error) {
+                console.log(error);
+                req.flash('error', 'Failed to create product.');
+                res.redirect('/products');
             }
-
-            req.flash('success', 'Product created successfully!');
-            res.redirect('/products');
-
         },
+
         "empty": async (form) => {
             // if the form is empty (no data provided)
             req.flash('error', 'Form cannot be empty.');
             res.render('products/create', {
                 'form': wrapForm(form),
+                'cloudinaryName': process.env.CLOUDINARY_NAME,
+                'cloudinaryApiKey': process.env.CLOUDINARY_API_KEY,
+                'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
             });
-
         },
+
         "error": async (form) => {
             // if the form has errors in validation 
             req.flash('error', 'Form has errors.');
             res.render('products/create', {
                 'form': wrapForm(form),
+                'cloudinaryName': process.env.CLOUDINARY_NAME,
+                'cloudinaryApiKey': process.env.CLOUDINARY_API_KEY,
+                'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
             })
         }
     })
@@ -134,12 +171,28 @@ router.get('/:productId/update', async (req, res) => {
     // fetch all the categories and flaovr profiles
     const allCategories = await getAllCategories();
     const allFlavorProfiles = await getAllFlavorProfile();
+    const allBrandNames = await getAllBrandNames();
+    const allCountries = await getAllCountries();
+    const allRegions = await getAllRegions();
+    const allDistilleries = await getAllDistilleries();
+    const allPackages = await getAllPackages();
+    const allProductImages = await getProductImage();
+    const allProductThumbnails = await getProductThumbnail();
 
     // fetch one row using Bookshelf
     const product = await getProductById(req.params.productId);
 
     // fetch productForm object with the necessary fields
-    const productForm = createProductForm(allCategories, allFlavorProfiles);
+    const productForm = createProductForm(
+        allCategories, 
+        allFlavorProfiles,
+        allBrandNames,
+        allCountries,
+        allRegions,
+        allDistilleries,
+        allPackages,
+        allProductImages,
+        allProductThumbnails);
 
     // //get the productForm : the hard way
     // productForm.fields.name.value = product.get('name');
@@ -163,9 +216,16 @@ router.get('/:productId/update', async (req, res) => {
     // put the selectedFlavorProfiles into the product fields
     productForm.fields.flavor_profiles.value = selectedFlavorProfiles;
 
+    // get all the selected images of the product
+    // let selectedProductImages = await product.related('product_image').toJSON();
+    // productForm.fields.product_image.value = selectedProductImages;
+
     res.render('products/update', {
         'product': product.toJSON(),
-        'form': productForm.toHTML(bootstrapField)
+        'form': wrapForm(form),
+        'cloudinaryName': process.env.CLOUDINARY_NAME,
+        'cloudinaryApiKey': process.env.CLOUDINARY_API_KEY,
+        'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
     });
 })
 
@@ -197,13 +257,19 @@ router.post('/:productId/update', async function (req, res) {
         },
         "empty": async (form) => {
             res.render('products/update', {
-                'form': productForm.toHTML(bootstrapField)
+                'form': wrapForm(form),
+                'cloudinaryName': process.env.CLOUDINARY_NAME,
+                'cloudinaryApiKey': process.env.CLOUDINARY_API_KEY,
+                'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
             })
 
         },
         "error": async (form) => {
             res.render('products/update', {
-                'form': productForm.toHTML(bootstrapField)
+                'form': wrapForm(form),
+                'cloudinaryName': process.env.CLOUDINARY_NAME,
+                'cloudinaryApiKey': process.env.CLOUDINARY_API_KEY,
+                'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
             })
             console.log(form);
         }

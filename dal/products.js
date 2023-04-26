@@ -43,7 +43,7 @@ async function getProductById(id) {
         requied: true,
         //flavor_profiles and category models are fetched and returned along with the main Product model.
         //as they are the name of the relationship
-        withRelated: ['category', 'flavor_profiles','country','region','distillery','package']
+        withRelated: ['category', 'flavor_profiles', 'country', 'region', 'distillery', 'package', 'product_image']
     })
     return product
 }
@@ -54,12 +54,40 @@ async function updateProduct(product, productData) {
     return product;
 }
 
+// async function createNewProductImage(image){
+//     const Product_Image = new Product_Image;
+//     image.set('image_url', image.image_url);
+//     image.set('thumbnail_url', image.thumbnail_url);
+//     await image.save();
+//     return image
+// }
+// same code but different way of writng as below
+async function createNewProductImage(imageUrl, thumbnailUrl, productId) {
+    const product_image = new Product_Image({
+        image_url: imageUrl,
+        thumbnail_Url: thumbnailUrl,
+        product_id: productId,
+    });  // creating a new row in the Product_Image table
+
+    await product_image.save();
+    return product_image
+}
+
+
 async function getProductImage() {
     const allProductImages = (await Product_Image.fetchAll()).map((image) => {
         return [image.get('id'), image.get('image_url')]
     })
     return allProductImages;
 }
+
+async function getProductThumbnail() {
+    const allProductThumbnails = (await Product_Image.fetchAll()).map((image) => {
+        return [image.get('id'), image.get('thumbnail_url')]
+    })
+    return allProductThumbnails;
+}
+
 
 async function getAllBrandNames() {
     const allBrandNames = (await Brand.fetchAll()).map((brand) => {
@@ -70,27 +98,27 @@ async function getAllBrandNames() {
 }
 
 async function getAllCountries() {
-    const allCountries =(await Country.fetchAll()).map(country=>{
+    const allCountries = (await Country.fetchAll()).map(country => {
         return [country.get('id'), country.get('country')]
     })
     return allCountries;
 }
 
 async function getAllRegions() {
-    const allRegions =(await Region.fetchAll()).map(region => {
+    const allRegions = (await Region.fetchAll()).map(region => {
         return [region.get('id'), region.get('region')]
     })
     return allRegions;
 }
 
-async function getAllDistilleries(){
+async function getAllDistilleries() {
     const allDistilleries = await Distillery.fetchAll().map(distillery => {
         return [distillery.get('id'), distillery.get('name')]
     })
     return allDistilleries;
 }
 
-async function getAllPackages(){
+async function getAllPackages() {
     const allPackages = await Package.fetchAll().map(package => {
         return [package.get('id'), package.get('description')]
     })
@@ -111,5 +139,7 @@ module.exports = {
     getAllCountries,
     getAllRegions,
     getAllDistilleries,
-    getAllPackages
+    getAllPackages,
+    createNewProductImage,
+    getProductThumbnail
 }

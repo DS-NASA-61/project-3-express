@@ -4,6 +4,7 @@ const wax = require("wax-on");
 const session = require('express-session');
 const flash = require('connect-flash');
 const csrf = require('csurf')
+const Handlebars = require('handlebars');
 
 // FileStore for storing the session
 const FileStore = require('session-file-store')(session);
@@ -22,6 +23,10 @@ app.use(express.static("public"));
 // setup wax-on
 wax.on(hbs.handlebars);
 wax.setLayoutPath("./views/layouts");
+
+hbs.registerHelper('log', function(value) {
+  console.log(value);
+});
 
 // enable forms
 app.use(

@@ -30,7 +30,7 @@
             <td>
                 {{this.brand.brand_name}}
             </td>
-             <td>
+            <td>
                 {{this.name}}
             </td>
             <td>
@@ -44,6 +44,7 @@
             </td>
             <td>
                 {{this.category.name}}
+
             </td>
             <td>
                 {{this.age}}
@@ -68,12 +69,16 @@
             </td>
             <td>
                 {{#each flavor_profiles}}
-                   <span class="badge bg-primary"> {{name}}</span>
+                <span class="badge bg-primary"> {{name}}</span>
                 {{/each}}
             </td>
             <td>
-                {{#if image_url}}
-                    <img src="{{image_url}}" class="img-fluid"/>
+                {{#if this.product_image}}
+                {{#each this.product_image}}
+                <img src="{{this.image_url}}" class="img-fluid" />
+                {{/each}}
+                {{else}}
+                {{log this.product_image}}
                 {{/if}}
             </td>
             <td>

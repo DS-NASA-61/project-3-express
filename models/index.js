@@ -33,8 +33,10 @@ const Product = bookshelf.model('Product', {
     },
     package(){
         return this.belongsTo('Package')
-    }
+    },
+    
 });
+
 
 const Category = bookshelf.model('Category', {
     tableName: "categories",
