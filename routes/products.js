@@ -1,6 +1,6 @@
 const express = require('express');
 const { Product, Category, Brand, Country, Region, Product_Image } = require('../models');
-const { createProductForm, bootstrapField, wrapForm } = require('../forms');
+const { createProductForm, bootstrapField, wrapForm, createSearchForm } = require('../forms');
 const { getAllCategories,
     createNewProduct,
     getProductById,
@@ -16,23 +16,123 @@ const { getAllCategories,
     createNewProductImage
 } = require('../dal/products');
 const { checkIfAuthenticated } = require('../middlewares');
+const async = require('hbs/lib/async');
 const router = express.Router();
 
 
 router.get('/', async (req, res) => {
-    // .collection() -- access all the rows
-    // .fetch() -- execute the query
-    const products = await Product.collection().fetch({
-        withRelated: ['category', 'flavor_profiles', 'brand', 'country', 'region', 'package', 'distillery', 'product_image']
-    });
 
-    console.log("products-->", products.toJSON())
-
-    // if we want the results to be in an array of objects form
-    // we have to call .toJSON on the results
-    res.render('products/index', {
-        'products': products.toJSON()
-    })
+    try {
+        const [allCategories, allFlavorProfiles, allBrandNames, allCountries, allRegions, allDistilleries] = await Promise.all([
+            getAllCategories(),
+            getAllFlavorProfile(),
+            getAllBrandNames(),
+            getAllCountries(),
+            getAllRegions(),
+            getAllDistilleries()
+        ]);
+    
+        const allArrays = [allCategories, allFlavorProfiles, allBrandNames, allCountries, allRegions, allDistilleries];
+    
+        allArrays.forEach((array) => {
+            array.unshift([0, "------"]);
+        });
+    
+        const searchForm = createSearchForm(
+            ...allArrays
+        );
+    
+        // the query to fetch EVERYTHING
+        let searchQuery = Product.collection(); // => SELECT * FROM products WHERE 1
+    
+        searchForm.handle(req, {
+            "success": async function (form) {
+                if (form.data.brand_id && form.data.brand_id != '0') {
+                    searchQuery.where('brand_id', '=', form.data.brand_id)
+                }
+                if (form.data.name) {
+                    // add in: AND WHERE name LIKE '%<somename>%'
+                    searchQuery.where('name', 'LIKE', '%' + form.data.name + '$')
+                }
+                if (form.data.country_id && form.data.country_id != '0') {
+                    searchQuery.where('country_id', '=', form.data.country_id)
+                }
+                if (form.data.region_id && form.data.region_id != '0') {
+                    searchQuery.where('region_id', '=', form.data.region_id)
+                }
+                if (form.data.category_id && form.data.category_id != '0') {
+                    searchQuery.where('category_id', '=', form.data.category_id)
+                }
+                if (form.data.distillery_id && form.data.distillery_id != '0') {
+                    searchQuery.where('distillery_id', '=', form.data.distillery_id)
+                }
+                if (form.data.distillery_id && form.data.distillery_id != '0') {
+                    searchQuery.where('distillery_id', '=', form.data.distillery_id)
+                }
+                if (form.data.min_cost) {
+                    q.where('cost', '>=', form.data.min_cost);
+                }
+                if (form.data.max_cost) {
+                    q.where('cost', '<=', form.data.max_cost);
+                }
+                if (form.data.min_age) {
+                    q.where('cost', '>=', form.data.min_age);
+                }
+                if (form.data.max_age) {
+                    q.where('cost', '<=', form.data.max_age);
+                }
+                if (form.data.min_strength) {
+                    q.where('cost', '>=', form.data.min_strength);
+                }
+                if (form.data.max_strength) {
+                    q.where('cost', '<=', form.data.max_strength);
+                }
+                if (form.data.flavor_profiles) {
+                    // JOIN flavor_profiles ON products.id = products_flavor_profiles.product_id
+                    q.query('join', 'products_flavor_profiles', 'products.id', 'product_id')
+                        .where('flavor_profiles_id', 'in', form.data.flavor_profiles.split(','))
+                }
+    
+                // .collection() -- access all the rows
+                // .fetch() -- execute the query
+                let products = await searchQuery.fetch({
+                    withRelated: ['category', 'flavor_profiles', 'brand', 'country', 'region', 'package', 'distillery', 'product_image']
+                });
+    
+                console.log("products-->", products.toJSON())
+    
+                // if we want the results to be in an array of objects form
+                // we have to call .toJSON on the results
+                res.render('products/index', {
+                    'products': products.toJSON(),
+                    'form': wrapForm(form),
+                })
+            },
+    
+            "empty": async function(form){
+                const products = await searchQuery.fetch({
+                    withRelated: ['category', 'flavor_profiles', 'brand', 'country', 'region', 'package', 'distillery', 'product_image']
+                });
+                res.render('products/index', {
+                    'products': products.toJSON(),
+                    'form': wrapForm(form),
+                })
+            },
+    
+            "error":  async function(form){
+                const products = await searchQuery.fetch({
+                    withRelated: ['category', 'flavor_profiles', 'brand', 'country', 'region', 'package', 'distillery', 'product_image']
+                });
+                res.render('products/index', {
+                    'products': products.toJSON(),
+                    'form': wrapForm(form),
+                })
+            },
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Something went wrong')
+    }
 })
 
 // --- create ---
@@ -184,7 +284,7 @@ router.get('/:productId/update', async (req, res) => {
 
     // fetch productForm object with the necessary fields
     const productForm = createProductForm(
-        allCategories, 
+        allCategories,
         allFlavorProfiles,
         allBrandNames,
         allCountries,

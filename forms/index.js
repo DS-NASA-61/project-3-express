@@ -203,12 +203,96 @@ const createLoginForm = () => {
     })
 }
 
+const createSearchForm = (
+    categories = [], 
+    flavor_profiles = [], 
+    brands = [], 
+    countries = [], 
+    regions = [],
+    distilleries = []
+    ) =>{
+    return forms.create({
+        "brand_id": fields.string({
+            label: 'Brand',
+            required: true,
+            widget: widgets.select(),
+            choices: brands
+        }),
+        "name": fields.string({
+            required: false,
+            errorAfterField: true,
+        }),
+        "country_id": fields.string({
+            label: 'Country',
+            required: true,
+            widget: widgets.select({}),
+            choices: countries,
+        }),
+        "region_id": fields.string({
+            label: 'Region',
+            required: false,
+            widget: widgets.select({}),
+            choices: regions,
+        }),
+        "category_id": fields.string({
+            label: 'Category',
+            required: true,
+            widget: widgets.select(),
+            choices: categories
+        }),
+        "distillery_id": fields.string({
+            label: 'Distillery',
+            required: false,
+            widget: widgets.select({}),
+            choices: distilleries,
+        }),
+        'min_age': fields.string({
+            required: false,
+            errorAfterField:true,
+            validators: [validators.integer()]
+        }),
+        'max_age': fields.string({
+            required: false,
+            errorAfterField:true,
+            validators: [validators.integer()]
+        }),
+        'min_cost': fields.string({
+            required: false,
+            errorAfterField:true,
+            validators: [validators.integer()]
+        }),
+        'max_cost': fields.string({
+            required: false,
+            errorAfterField:true,
+            validators: [validators.integer()]
+        }),
+        'min_strength': fields.string({
+            required: false,
+            errorAfterField:true,
+            validators: [validators.integer()]
+        }),
+        'max_strength': fields.string({
+            required: false,
+            errorAfterField:true,
+            validators: [validators.integer()]
+        }),
+        "flavor_profiles": fields.string({
+            label: 'Flavor_Profile',
+            required: false,
+            widget: widgets.multipleSelect(),
+            choices: flavor_profiles
+        }),
+        
+    })
+}
+
 module.exports =
 {
     wrapForm,
     bootstrapField,
     createProductForm,
     createRegistrationForm,
-    createLoginForm
+    createLoginForm,
+    createSearchForm
 }
 
