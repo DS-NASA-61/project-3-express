@@ -13,18 +13,15 @@ async function getCurrentStock(productId) {
 async function getCart(userId) {
 
     let cartItems = await cartDataLayer.getCart(userId);
-    // console.log("cartItems", cartItems)
 
     let removedProducts = [];
-    for (let i = 0; i < cartItems.models.length; i++) {
+    for (let i = 0; i < cartItems.length; i++) {
         const cartItem = cartItems.models[i].toJSON();
         // toJSON() method can be used on individual model instances, not directly on the Collection.
         // cartItems is a Bookshelf Collection, so can't use .toJson() based on console.log(cartItems)
         // cartItems.models is model instance array, which is why can call toJSON() on cartItems.models[i].
-        let cartItems = await cartDataLayer.getCart(userId);
         const productId = cartItem.product_id;
         const currentStock = await getCurrentStock(productId);
-
 
         // If the stock of a product has reached 0, 
         // remove the product from the cart
