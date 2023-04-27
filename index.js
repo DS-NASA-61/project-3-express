@@ -24,7 +24,7 @@ app.use(express.static("public"));
 wax.on(hbs.handlebars);
 wax.setLayoutPath("./views/layouts");
 
-hbs.registerHelper('log', function(value) {
+hbs.registerHelper('log', function (value) {
   console.log(value);
 });
 
@@ -82,7 +82,7 @@ app.use(function (err, req, res, next) {
 
 // once csfr is initialized, csrfToken() method will be ready to use to generate token
 //share CSRF token with hbs files
-app.use(function(req,res,next){
+app.use(function (req, res, next) {
   res.locals.csrfToken = req.csrfToken();
   next();
 })
@@ -117,6 +117,8 @@ const landingRoutes = require('./routes/landing.js');
 const productRoutes = require('./routes/products.js');
 const userRoutes = require('./routes/users.js');
 const cloudinaryRoutes = require('./routes/cloudinary.js');
+const cartRoutes = require('./routes/cart.js');
+
 
 async function main() {
   // make use of the landing page routes
@@ -126,10 +128,12 @@ async function main() {
   // If the URL begins with /products, then use productRoutes
   app.use('/products', productRoutes)
 
-   // If the URL begins with /users, then use the userRoutes
-   app.use('/users', userRoutes);
-  
-   app.use('/cloudinary',cloudinaryRoutes );
+  // If the URL begins with /users, then use the userRoutes
+  app.use('/users', userRoutes);
+
+  app.use('/cloudinary', cloudinaryRoutes);
+
+  app.use('/cart', cartRoutes)
 }
 
 main();

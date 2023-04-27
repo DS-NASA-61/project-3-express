@@ -6,7 +6,7 @@ async function getCart(userId) {
         user_id: userId
     }).fetch({
         require: false,
-        withRelated: ['product', 'product.name']
+        withRelated: ['products', 'products.product_image']
     })
 }
 
@@ -52,6 +52,16 @@ async function removeFromCart(userId, productId){
     return false;
 }
 
+// empty cart: remove all cart items associated with the given userId.
+async function removeAllCartItemsByUser(userId){
+    try {
+        await Cart_Item.destroy({
+            where: { 'user_id': userId },
+        });
+    } catch (error) {
+        console.error('Error removing all cart items for user:', error);
+    }
+}
 
 
 module.exports = {
@@ -59,5 +69,6 @@ module.exports = {
     getCartItemByUserAndProduct,
     addItemToCart,
     updateQuantity,
-    removeFromCart
+    removeFromCart,
+    removeAllCartItemsByUser
 }
