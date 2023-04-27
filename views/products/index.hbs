@@ -1,103 +1,110 @@
 {{#extends "base"}}
 {{#block "content"}}
 
-<h2>Search</h2>
-<form method="GET">
-    {{{form}}}
-    <input type="submit" class="btn btn-primary mt-3" value="Search"/>
-<form>
-    
-<table class="table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Brand</th>
-            <th>Name</th>
-            <th>Distillery</th>
-            <th>Country</th>
-            <th>Region</th>
-            <th>Category</th>
-            <th>Age</th>
-            <th>Cost</th>
-            <th>Strength</th>
-            <th>Volume</th>
-            <th>Description</th>
-            <th>Package</th>
-            <th>Stock</th>
-            <th>Flavor Profile</th>
-            <th>Image</th>
-        </tr>
-    </thead>
-    <tbody>
-        {{#each products}}
-        <tr>
-            <td>
-                {{this.id}}
-            </td>
-            <td>
-                {{this.brand.brand_name}}
-            </td>
-            <td>
-                {{this.name}}
-            </td>
-            <td>
-                {{this.distillery.name}}
-            </td>
-            <td>
-                {{this.country.country}}
-            </td>
-            <td>
-                {{this.region.region}}
-            </td>
-            <td>
-                {{this.category.name}}
+<div class="container">
+    <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#searchForm" aria-expanded="false" aria-controls="searchForm">
+        Show/Hide Search Form
+    </button>
 
-            </td>
-            <td>
-                {{this.age}}
-            </td>
-            <td>
-                {{this.cost}}
-            </td>
-            <td>
-                {{this.strength}}
-            </td>
-            <td>
-                {{this.volume}}
-            </td>
-            <td>
-                {{this.description}}
-            </td>
-            <td>
-                {{this.package.description}}
-            </td>
-            <td>
-                {{this.stock}}
-            </td>
-            <td>
-                {{#each flavor_profiles}}
-                <span class="badge bg-primary"> {{name}}</span>
-                {{/each}}
-            </td>
-            <td>
-                {{#if this.product_image}}
-                {{#each this.product_image}}
-                <img src="{{this.image_url}}" class="img-fluid" />
-                {{/each}}
-                {{else}}
-                {{log this.product_image}}
-                {{/if}}
-            </td>
-            <td>
-                <a href="/products/{{this.id}}/update" class="btn btn-primary btn-sm">Update</a>
-                <a href="/products/{{this.id}}/delete" class="btn btn-danger btn-sm">Delete</a>
-            </td>
+    <div class="collapse" id="searchForm">
+        <form method="GET">
+            {{{form}}}
+            <input type="submit" class="btn btn-primary mt-3" value="Search"/>
+        </form>
+    </div>
 
-        </tr>
-        {{/each}}
-    </tbody>
+    <table class="table mt-5">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Brand</th>
+                <th>Name</th>
+                <th>Distillery</th>
+                <th>Country</th>
+                <th>Region</th>
+                <th>Category</th>
+                <th>Age</th>
+                <th>Cost</th>
+                <th>Strength</th>
+                <th>Volume</th>
+                <th>Description</th>
+                <th>Package</th>
+                <th>Stock</th>
+                <th>Flavor Profile</th>
+                <th>Image</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each products}}
+            <tr>
+                <td>
+                    {{this.id}}
+                </td>
+                <td>
+                    {{this.brand.brand_name}}
+                </td>
+                <td>
+                    {{this.name}}
+                </td>
+                <td>
+                    {{this.distillery.name}}
+                </td>
+                <td>
+                    {{this.country.country}}
+                </td>
+                <td>
+                    {{this.region.region}}
+                </td>
+                <td>
+                    {{this.category.name}}
 
-</table>
+                </td>
+                <td>
+                    {{this.age}}
+                </td>
+                <td>
+                    {{this.cost}}
+                </td>
+                <td>
+                    {{this.strength}}
+                </td>
+                <td>
+                    {{this.volume}}
+                </td>
+                <td>
+                    {{this.description}}
+                </td>
+                <td>
+                    {{this.package.description}}
+                </td>
+                <td>
+                    {{this.stock}}
+                </td>
+                <td>
+                    {{#each flavor_profiles}}
+                    <span class="badge bg-primary"> {{name}}</span>
+                    {{/each}}
+                </td>
+                <td>
+                    {{#if this.product_image}}
+                    {{#each this.product_image}}
+                    <img src="{{this.image_url}}" class="img-fluid" />
+                    {{/each}}
+                    {{else}}
+                    {{log this.product_image}}
+                    {{/if}}
+                </td>
+                <td>
+                    <a href="/products/{{this.id}}/update" class="btn btn-primary btn-sm">Update</a>
+                    <a href="/products/{{this.id}}/delete" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
 {{/block}}
 
 {{/extends}}
