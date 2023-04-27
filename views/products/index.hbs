@@ -2,7 +2,8 @@
 {{#block "content"}}
 
 <div class="container">
-    <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#searchForm" aria-expanded="false" aria-controls="searchForm">
+
+    <button class="btn btn-primary mt-3" type="button" data-bs-toggle="collapse" data-bs-target="#searchForm" aria-expanded="false" aria-controls="searchForm">
         Show/Hide Search Form
     </button>
 
@@ -10,10 +11,11 @@
         <form method="GET">
             {{{form}}}
             <input type="submit" class="btn btn-primary mt-3" value="Search"/>
+            <button type="button" class="btn btn-secondary mt-3" id="clearForm">Clear Form</button>
         </form>
     </div>
 
-    <table class="table mt-5">
+    <table class="table">
         <thead>
             <tr>
                 <th>ID</th>
@@ -104,6 +106,24 @@
         </tbody>
     </table>
 </div>
+
+<script>
+    document.getElementById('clearForm').addEventListener('click', function () {
+        const searchForm = document.getElementById('searchForm');
+        const formInputs = searchForm.getElementsByTagName('input');
+        const formSelects = searchForm.getElementsByTagName('select');
+        
+        for (const input of formInputs) {
+            if (input.type !== 'submit') {
+                input.value = '';
+            }
+        }
+        
+        for (const select of formSelects) {
+            select.selectedIndex = 0;
+        }
+    });
+</script>
 
 {{/block}}
 

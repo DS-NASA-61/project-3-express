@@ -34,6 +34,9 @@ const Product = bookshelf.model('Product', {
     package(){
         return this.belongsTo('Package')
     },
+    cart_item(){
+        return this.hasMany('Cart_Item')
+    }
     
 });
 
@@ -100,6 +103,16 @@ const Package = bookshelf.model('Package', {
     }
 })
 
+const Cart_Item = bookshelf.model('Cart_Item',{
+    tableName:'cart_items',
+    products() {
+        return this.belongsTo('Product')
+    },
+    users(){
+        return this.belongsTo('User')
+    }
+})
+
 module.exports = { 
     Product, 
     Category, 
@@ -110,5 +123,6 @@ module.exports = {
     Country,
     Region,
     Distillery,
-    Package
+    Package,
+    Cart_Item
 }

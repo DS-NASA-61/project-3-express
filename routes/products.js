@@ -35,7 +35,11 @@ router.get('/', async (req, res) => {
         const allArrays = [allCategories, allFlavorProfiles, allBrandNames, allCountries, allRegions, allDistilleries];
     
         allArrays.forEach((array) => {
-            array.unshift([0, "------"]);
+            if (array === allFlavorProfiles) {
+                array.unshift([0, "All"]);
+            } else {
+                array.unshift([0, "------"]);
+            }
         });
     
         const searchForm = createSearchForm(
@@ -52,7 +56,7 @@ router.get('/', async (req, res) => {
                 }
                 if (form.data.name) {
                     // add in: AND WHERE name LIKE '%<somename>%'
-                    searchQuery.where('name', 'LIKE', '%' + form.data.name + '$')
+                    searchQuery.where('name', 'LIKE', `%${form.data.name}%`)
                 }
                 if (form.data.country_id && form.data.country_id != '0') {
                     searchQuery.where('country_id', '=', form.data.country_id)
@@ -70,27 +74,27 @@ router.get('/', async (req, res) => {
                     searchQuery.where('distillery_id', '=', form.data.distillery_id)
                 }
                 if (form.data.min_cost) {
-                    q.where('cost', '>=', form.data.min_cost);
+                    searchQuery.where('cost', '>=', form.data.min_cost);
                 }
                 if (form.data.max_cost) {
-                    q.where('cost', '<=', form.data.max_cost);
+                    searchQuery.where('cost', '<=', form.data.max_cost);
                 }
                 if (form.data.min_age) {
-                    q.where('cost', '>=', form.data.min_age);
+                    searchQuery.where('age', '>=', form.data.min_age);
                 }
                 if (form.data.max_age) {
-                    q.where('cost', '<=', form.data.max_age);
+                    searchQuery.where('age', '<=', form.data.max_age);
                 }
                 if (form.data.min_strength) {
-                    q.where('cost', '>=', form.data.min_strength);
+                    searchQuery.where('strength', '>=', form.data.min_strength);
                 }
                 if (form.data.max_strength) {
-                    q.where('cost', '<=', form.data.max_strength);
+                    searchQueryq.where('strength', '<=', form.data.max_strength);
                 }
-                if (form.data.flavor_profiles) {
-                    // JOIN flavor_profiles ON products.id = products_flavor_profiles.product_id
-                    q.query('join', 'products_flavor_profiles', 'products.id', 'product_id')
-                        .where('flavor_profiles_id', 'in', form.data.flavor_profiles.split(','))
+                if (form.data.flavor_profiles && form.data.flavor_profiles != '0') {
+                    // JOIN flavor_profiles ON products.id = products_flaovr_profiles.product_id
+                    searchQuery.query('join', 'flavor_profiles_products', 'products.id', 'product_id')
+                        .where('flavor_profile_id', 'in', form.data.flavor_profiles.split(','))
                 }
     
                 // .collection() -- access all the rows
@@ -134,6 +138,8 @@ router.get('/', async (req, res) => {
         res.status(500).send('Something went wrong')
     }
 })
+
+
 
 // --- create ---
 // placing checkIfAuthenticated as the second argument 
