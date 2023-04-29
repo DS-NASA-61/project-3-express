@@ -1,6 +1,10 @@
 const async = require('hbs/lib/async');
 const { Category, Product, Flavor_Profile, Product_Image, Brand, Country, Region, Distillery, Package } = require('../models');
 
+async function getAllProducts() {
+    return await Product.fetchAll();
+}
+
 async function getAllCategories() {
     const allCategories = (await Category.fetchAll()).map((category) => {
         return [category.get('id'), category.get('name')];
@@ -126,6 +130,69 @@ async function getAllPackages() {
 }
 
 
+// for restful api product search
+async function searchProducts(formData) {
+
+    // .collection() -- access all the rows
+    let searchQuery = Product.collection();
+
+    if (formData) {
+        if (formData.brand_id && formData.brand_id != '0') {
+            searchQuery.where('brand_id', '=', formData.brand_id)
+        }
+        if (formData.name) {
+            // add in: AND WHERE name LIKE '%<somename>%'
+            searchQuery.where('name', 'LIKE', `%${formData.name}%`)
+        }
+        if (formData.country_id && formData.country_id != '0') {
+            searchQuery.where('country_id', '=', formData.country_id)
+        }
+        if (formData.region_id && formData.region_id != '0') {
+            searchQuery.where('region_id', '=', formData.region_id)
+        }
+        if (formData.category_id && formData.category_id != '0') {
+            searchQuery.where('category_id', '=', formData.category_id)
+        }
+        if (formData.distillery_id && formData.distillery_id != '0') {
+            searchQuery.where('distillery_id', '=', formData.distillery_id)
+        }
+        if (formData.min_cost) {
+            searchQuery.where('cost', '>=', formData.min_cost);
+        }
+        if (formData.max_cost) {
+            searchQuery.where('cost', '<=', formData.max_cost);
+        }
+        if (formData.min_age) {
+            searchQuery.where('age', '>=', formData.min_age);
+        }
+        if (formData.max_age) {
+            searchQuery.where('age', '<=', formData.max_age);
+        }
+        if (formData.min_strength) {
+            searchQuery.where('strength', '>=', formData.min_strength);
+        }
+        if (formData.max_strength) {
+            searchQuery.where('strength', '<=', formData.max_strength);
+        }
+        if (formData.flavor_profiles && formData.flavor_profiles != '0') {
+            // JOIN flavor_profiles ON products.id = products_flaovr_profiles.product_id
+            searchQuery.query('join', 'flavor_profiles_products', 'products.id', 'product_id')
+                .where('flavor_profile_id', 'in', formData.flavor_profiles.split(','))
+        }
+    }
+
+    
+    // .fetch() -- execute the query
+    const products = await searchQuery.fetch({
+        withRelated: ['category', 'flavor_profiles', 'brand', 'country', 'region', 'package', 'distillery', 'product_image']
+    });
+
+    // if we want the results to be in an array of objects form, then
+    // we need to call .toJSON on the results
+    return products.toJSON();
+
+}
+
 
 
 module.exports = {
@@ -141,5 +208,7 @@ module.exports = {
     getAllDistilleries,
     getAllPackages,
     createNewProductImage,
-    getProductThumbnail
+    getProductThumbnail,
+    getAllProducts,
+    searchProducts
 }

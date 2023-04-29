@@ -57,15 +57,15 @@ app.use(csrf());
 // use our own proxy mdidleware to initialize csrf selectively
 // (i.e so that we can exclude certain routes from csrf)
 // because routes use other means of authentication (e.g.JWT tokens) and do not need CSRF protection.?
-// const csrfInstance = csrf();
-// app.use(function(req, res, next){
-//   if(req.url == "/checkout/process_payment" || req.url.slice(0,5) === "/api/"){
-//     next(); // to exempt the route from CSRF
-//   } else{
-//     // enable csrf for requests that does not access the payment
-//     csrfInstance(req, res, next)
-//   }
-// })
+const csrfInstance = csrf();
+app.use(function(req, res, next){
+  if(req.url == "/checkout/process_payment" || req.url.slice(0,5) === "/api/"){
+    next(); // to exempt the route from CSRF
+  } else{
+    // enable csrf for requests that does not access the payment
+    csrfInstance(req, res, next)
+  }
+})
 
 // this middleware is to handle invalid csrf tokens errors
 // make sure to put this immediately after the app.use(csrf())
@@ -100,8 +100,6 @@ app.use(function (req, res, next) {
   next();
 });
 
-
-
 // this global middleware is to add user data across all hbs files
 // sets the user property of res.locals to the user property of req.session
 app.use(function (req, res, next) {
@@ -123,6 +121,10 @@ const userRoutes = require('./routes/users.js');
 const cloudinaryRoutes = require('./routes/cloudinary.js');
 const cartRoutes = require('./routes/cart.js');
 
+const api = {
+  products: require('./routes/api/products.js')
+};
+
 
 async function main() {
   // make use of the landing page routes
@@ -138,6 +140,9 @@ async function main() {
   app.use('/cloudinary', cloudinaryRoutes);
 
   app.use('/cart', cartRoutes)
+
+  //API routes
+  app.use('/api/products', express.json(), api.products)
 }
 
 main();
