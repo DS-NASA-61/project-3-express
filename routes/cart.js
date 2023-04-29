@@ -11,10 +11,15 @@ router.get('/', [checkIfAuthenticated], async (req, res) => {
 })
 
 router.get('/:productId/add', [checkIfAuthenticated], async function (req, res) {
-    await cartServices.addToCart(req.session.user.id, req.params.productId, 1);
-    req.flash("success", "Item added to cart");
-    res.redirect('/cart/');
-    console.log("hello")
+    const success = await cartServices.addToCart(req.session.user.id, req.params.productId, 1);
+    if(success){
+        req.flash("success", "Item added to cart");
+        res.redirect('/cart/');
+    }
+    else{
+        req.flash("error", "No more stock available for this item")
+        res.redirect(`/products/`);
+    }
 })
 
 module.exports = router;

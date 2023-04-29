@@ -1,4 +1,3 @@
-const async = require('hbs/lib/async');
 const cartDataLayer = require('../dal/cartItems')
 const productDataLayer = require('../dal/products');
 

@@ -4,7 +4,7 @@ const wax = require("wax-on");
 const session = require('express-session');
 const flash = require('connect-flash');
 const csrf = require('csurf')
-const Handlebars = require('handlebars');
+const { cloudinaryImageUrl } = require('./utilities');
 
 // FileStore for storing the session
 const FileStore = require('session-file-store')(session);
@@ -25,7 +25,7 @@ wax.on(hbs.handlebars);
 wax.setLayoutPath("./views/layouts");
 
 hbs.registerHelper('log', function (value) {
-  console.log(value);
+  
 });
 
 // enable forms
@@ -35,9 +35,6 @@ app.use(
   })
 );
 
-
-// configure server to serve static files
-app.use(express.static('public'));
 
 // setup sessions
 app.use(session({
@@ -112,7 +109,10 @@ app.use(function (req, res, next) {
   next();
 });
 
-
+// register the Handlebars helper
+hbs.registerHelper('cloudinaryImageUrl', function (publicId, options) {
+  return cloudinaryImageUrl(publicId, options.hash);
+});
 
 
 // import in the router

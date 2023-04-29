@@ -70,9 +70,6 @@ router.get('/', async (req, res) => {
                 if (form.data.distillery_id && form.data.distillery_id != '0') {
                     searchQuery.where('distillery_id', '=', form.data.distillery_id)
                 }
-                if (form.data.distillery_id && form.data.distillery_id != '0') {
-                    searchQuery.where('distillery_id', '=', form.data.distillery_id)
-                }
                 if (form.data.min_cost) {
                     searchQuery.where('cost', '>=', form.data.min_cost);
                 }
@@ -89,7 +86,7 @@ router.get('/', async (req, res) => {
                     searchQuery.where('strength', '>=', form.data.min_strength);
                 }
                 if (form.data.max_strength) {
-                    searchQueryq.where('strength', '<=', form.data.max_strength);
+                    searchQuery.where('strength', '<=', form.data.max_strength);
                 }
                 if (form.data.flavor_profiles && form.data.flavor_profiles != '0') {
                     // JOIN flavor_profiles ON products.id = products_flaovr_profiles.product_id
@@ -230,8 +227,6 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
                 if (form.data.image_url) {
                     const productImage = await createNewProductImage(form.data.image_url, form.data.thumbnail_url, product.id)
                     await productImage.save({ product_id: product.id }, { patch: true });
-                    console.log("productImage", productImage)
-                    console.log("product.id", product.id)
                 }
 
 

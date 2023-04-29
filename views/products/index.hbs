@@ -1,21 +1,28 @@
 {{#extends "base"}}
 {{#block "content"}}
 
-<div class="container">
+<div class="container my-4">
 
-    <button class="btn btn-primary mt-3" type="button" data-bs-toggle="collapse" data-bs-target="#searchForm" aria-expanded="false" aria-controls="searchForm">
-        Show/Hide Search Form
-    </button>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Product List</h2>
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#searchForm"
+            aria-expanded="false" aria-controls="searchForm">
+            Show/Hide Search Form
+        </button>
+    </div>
 
-    <div class="collapse" id="searchForm">
-        <form method="GET">
+    <div class="collapse mb-4" id="searchForm">
+        <form method="GET" class="bg-light p-3 rounded">
             {{{form}}}
-            <input type="submit" class="btn btn-primary mt-3" value="Search"/>
-            <button type="button" class="btn btn-secondary mt-3" id="clearForm">Clear Form</button>
+            <div class="d-flex justify-content-end mt-3">
+                <input type="submit" class="btn btn-primary me-2" value="Search" />
+                <button type="button" class="btn btn-secondary" id="clearForm">Clear Form</button>
+            </div>
         </form>
     </div>
 
-    <table class="table">
+    <div class="table-responsive">
+        <table class="table table-striped">
         <thead>
             <tr>
                 <th>ID</th>
@@ -34,78 +41,55 @@
                 <th>Stock</th>
                 <th>Flavor Profile</th>
                 <th>Image</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {{#each products}}
             <tr>
-                <td>
-                    {{this.id}}
-                </td>
-                <td>
-                    {{this.brand.brand_name}}
-                </td>
-                <td>
-                    {{this.name}}
-                </td>
-                <td>
-                    {{this.distillery.name}}
-                </td>
-                <td>
-                    {{this.country.country}}
-                </td>
-                <td>
-                    {{this.region.region}}
-                </td>
-                <td>
-                    {{this.category.name}}
-
-                </td>
-                <td>
-                    {{this.age}}
-                </td>
-                <td>
-                    {{this.cost}}
-                </td>
-                <td>
-                    {{this.strength}}
-                </td>
-                <td>
-                    {{this.volume}}
-                </td>
-                <td>
-                    {{this.description}}
-                </td>
-                <td>
-                    {{this.package.description}}
-                </td>
-                <td>
-                    {{this.stock}}
-                </td>
+                <td>{{this.id}}</td>
+                <td>{{this.brand.brand_name}}</td>
+                <td class="text-truncate" style="max-width: 150px;">{{this.name}}</td>
+                <td>{{this.distillery.name}}</td>
+                <td>{{this.country.country}}</td>
+                <td>{{this.region.region}}</td>
+                <td class="text-truncate" style="max-width: 150px;">{{this.category.name}}</td>
+                <td>{{this.age}}</td>
+                <td>{{this.cost}}</td>
+                <td>{{this.strength}}</td>
+                <td>{{this.volume}}</td>
+                <td class="text-truncate" style="max-width: 150px;">{{this.description}}</td>
+                <td class="text-truncate" style="max-width: 150px;">{{this.package.description}}</td>
+                <td>{{this.stock}}</td>
                 <td>
                     {{#each flavor_profiles}}
-                    <span class="badge bg-primary"> {{name}}</span>
+                    <span class="badge bg-primary me-1"> {{name}}</span>
                     {{/each}}
                 </td>
                 <td>
                     {{#if this.product_image}}
                     {{#each this.product_image}}
-                    <img src="{{this.image_url}}" class="img-fluid" />
+                    <img src="{{this.image_url}}" class="img-fluid" style="max-width: 50px; max-height: 50px" />
                     {{/each}}
                     {{else}}
-                    {{log this.product_image}}
+                    {{!-- {{log this.product_image}} --}}
                     {{/if}}
                 </td>
                 <td>
-                    <a href="/cart/{{this.id}}/add" class="btn btn-success btn-sm">Add to cart</a>
-                    <a href="/products/{{this.id}}/update" class="btn btn-primary btn-sm">Update</a>
-                    <a href="/products/{{this.id}}/delete" class="btn btn-danger btn-sm">Delete</a>
+                    <div class="d-flex align-items-center">
+                        <a href="/cart/{{this.id}}/add" class="btn btn-success btn-sm me-2"
+                            style="white-space: nowrap;">Add to cart</a>
+                        <a href="/products/{{this.id}}/update" class="btn btn-primary btn-sm me-2">Update</a>
+                        <a href="/products/{{this.id}}/delete" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
                 </td>
-
             </tr>
             {{/each}}
         </tbody>
+
+
     </table>
+    </div>
 </div>
 
 <script>
@@ -113,13 +97,13 @@
         const searchForm = document.getElementById('searchForm');
         const formInputs = searchForm.getElementsByTagName('input');
         const formSelects = searchForm.getElementsByTagName('select');
-        
+
         for (const input of formInputs) {
             if (input.type !== 'submit') {
                 input.value = '';
             }
         }
-        
+
         for (const select of formSelects) {
             select.selectedIndex = 0;
         }

@@ -8,10 +8,11 @@
         <div class="card-title">
             <div class="d-flex align-items-center">
                 {{#if this.products.product_image.[0]}}
-                <img src="{{this.products.product_image.[0].image_url}}" style="width: 150px"
+                <img src="{{this.products.product_image.[0].image_url}}" style="width: 50px"
                     class="img-thumbnail img-fluid" />
                 {{else}}
-                <img src="/images/default-product.jpg" style="width: 150px" class="img-thumbnail img-fluid" />
+                <img src="https://res.cloudinary.com/de0wfq7r4/image/upload/v1682600514/default-product.jpg" style="width: 50px"
+                    class="img-thumbnail img-fluid" />
                 {{/if}}
                 <h2>{{this.products.name}}</h2>
             </div>
