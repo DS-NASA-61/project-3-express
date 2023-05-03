@@ -3,10 +3,166 @@
 {{#block "content"}}
 <h1>Update Product: {{product.name}}</h1>
 <form method="POST">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}" />
     {{{form}}}
-    <input type="hidden" name="_csrf" value="{{csrfToken}}"/>
-    <input type="submit" value="Update" class="mt-3 btn btn-primary btn-sm"/>
+    <input type="hidden" name="old_image_urls" id="old_image_urls" value="" />
+
+    <div>
+        {{!-- The this keyword refers to the current context, the product_image is not
+        directly accessible in the current context, so should use product.product_image instead.
+        In Handlebars, this refers to the current context (the data object passed to
+        the template).
+        but server-side code, I'm passing below object to the hbs template,
+        {
+        'product': product.toJSON(),
+        'form': wrapForm(productForm),
+        'cloudinaryName': process.env.CLOUDINARY_NAME,
+        'cloudinaryApiKey': process.env.CLOUDINARY_API_KEY,
+        'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
+        }
+        and the product_image is a property of the product object which is not directly
+        accessible in the current context, aka :it is one of the properties of the data
+        object passed to the template.So, to access the product_image, need to use
+        product.product_image instead of this.product_image in the template.
+        When inside a block helper like {{#each}}, the context changes to the
+        current item in the loop. In that case, this is used to refer to the current
+        item. But outside the block helper, need to access the
+        product_image property using the product object, like product.product_image. --}}
+        <div id="image-container">
+            {{#if product.product_image}}
+            {{#each product.product_image}}
+            <div class="image-wrapper">
+                <img src="{{this.image_url}}" class="img-fluid" style="max-width: 50px; max-height: 50px" />
+                <button class="btn btn-sm btn-danger delete-image" data-url="{{this.image_url}}"
+                    style="position: absolute; right: 0;">&times;</button>
+            </div>
+            {{/each}}
+            {{else}}
+            <img src="" style="display:none" id="uploaded-image" />
+            {{/if}}
+        </div>
+
+    </div>
+    <div>
+        <a href="#" class="btn btn-primary btn-sm" id="show-upload-widget">Upload</a>
+    </div>
+    <input type="submit" value="Update" class="mt-3 btn btn-primary btn-sm" />
 </form>
+{{/block}}
+
+{{#block "js"}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.5/axios.min.js"
+    integrity="sha512-nnNHpffPSgINrsR8ZAIgFUIMexORL5tPwsfktOTxVYSv+AUAILuFYWES8IHl+hhIhpFGlKvWFiz9ZEusrPcSBQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
+
+<script>
+    const cloudinaryName = "{{cloudinaryName}}";
+    const cloudinaryApiKey = "{{cloudinaryApiKey}}";
+    const cloudinaryPreset = "{{cloudinaryPreset}}";
+
+    function generateSignature(callback, params_to_sign) {
+        axios.get('/cloudinary/sign', {
+            params: {
+                "params_to_sign": params_to_sign
+            }
+        }).then(function (response) {
+            callback(response.data);
+        })
+    }
+
+    const myWidget = cloudinary.createUploadWidget({
+        cloudName: cloudinaryName,
+        apiKey: cloudinaryApiKey,
+        uploadPreset: cloudinaryPreset,
+        uploadSignature: generateSignature,
+    }, function (error, result) {
+        // this function is automatically called by the cloudinary widget
+        // after the image finishes upload
+        if (result.event == "success") {
+            const imageUrlInput = document.querySelector("input[name='image_url']");
+            const thumbnailUrlInput = document.querySelector("input[name='thumbnail_url']");
+            const oldImageUrlsInput = document.querySelector("#old_image_urls");
+
+            const imageWrapper = document.createElement("div");
+            imageWrapper.className = "image-wrapper";
+
+            const uploadedImage = document.createElement("img");
+            uploadedImage.src = result.info.secure_url;
+            uploadedImage.className = "img-fluid";
+            uploadedImage.style.maxWidth = "50px";
+            uploadedImage.style.maxHeight = "50px";
+
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "btn btn-sm btn-danger delete-image";
+            deleteButton.dataset.url = result.info.secure_url;
+            deleteButton.style.position = "absolute";
+            deleteButton.style.right = "0";
+            deleteButton.innerHTML = "&times;";
+            deleteButton.addEventListener('click', function () {
+                const imageUrl = this.dataset.url;
+
+                // Remove the image from the DOM
+                this.parentNode.remove();
+
+                // Add the deleted image URL to the old_image_urls hidden input field
+                if (oldImageUrlsInput.value) {
+                    oldImageUrlsInput.value += "," + imageUrl;
+                } else {
+                    oldImageUrlsInput.value = imageUrl;
+                }
+            });
+
+            imageWrapper.appendChild(uploadedImage);
+            imageWrapper.appendChild(deleteButton);
+
+            // Append the imageWrapper to the container
+            document.querySelector("#image-container").appendChild(imageWrapper);
+
+            // below code is to update the value of the image_url and thumbnail_url 
+            // hidden fields by appending the new URLs separated by a comma:
+            // Set the value of the image_url hidden field
+            if (imageUrlInput.value) {
+                imageUrlInput.value += "," + result.info.secure_url;
+            } else {
+                imageUrlInput.value = result.info.secure_url;
+            }
+
+            // Set the value of the thumbnail_url hidden field
+            if (thumbnailUrlInput.value) {
+                thumbnailUrlInput.value += "," + result.info.thumbnail_url;
+            } else {
+                thumbnailUrlInput.value = result.info.thumbnail_url;
+            }
+
+        }
+
+
+    })
+    document.querySelector("#show-upload-widget")
+        .addEventListener('click', function () {
+            myWidget.open();
+        })
+
+    document.querySelectorAll('.delete-image').forEach((deleteButton) => {
+        deleteButton.addEventListener('click', function () {
+            const imageUrl = this.dataset.url;
+            const oldImageUrlsInput = document.querySelector("#old_image_urls");
+
+            // Remove the image from the DOM
+            this.parentNode.remove();
+
+            // Add the deleted image URL to the old_image_urls hidden input field
+            if (oldImageUrlsInput.value) {
+                oldImageUrlsInput.value += "," + imageUrl;
+            } else {
+                oldImageUrlsInput.value = imageUrl;
+            }
+        });
+    });
+
+</script>
 {{/block}}
 
 {{/extends}}

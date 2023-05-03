@@ -34,8 +34,12 @@
         })
     }
 
+    const imageUrls = [];
+    const thumbnailUrls = [];
+
     const myWidget = cloudinary.createUploadWidget({
         cloudName: cloudinaryName,
+        multiple: true,
         apiKey: cloudinaryApiKey,
         uploadPreset: cloudinaryPreset,
         uploadSignature: generateSignature,       
@@ -44,9 +48,21 @@
         // this function is automatically called by the cloudinary widget
         // after the image finishes upload
         if (result.event == "success") {
-            document.querySelector("#id_image_url").value = result.info.secure_url;
-            document.querySelector("#uploaded-image").src = result.info.secure_url;
-            document.querySelector("#id_thumbnail_url").value = result.info.thumbnail_url;
+
+            imageUrls.push(result.info.secure_url);
+            
+            // Generate the thumbnail URL using public_id and format
+            const thumbnailUrl = `https://res.cloudinary.com/${cloudinaryName}/image/upload/w_200,h_200,c_fit/${result.info.public_id}.${result.info.format}`;
+            thumbnailUrls.push(thumbnailUrl);
+
+            
+            // document.querySelector("#id_image_url").value = result.info.secure_url;
+            // document.querySelector("#uploaded-image").src = result.info.secure_url;
+            // document.querySelector("#id_thumbnail_url").value = result.info.thumbnail_url;
+
+            // Join the arrays into comma-separated strings
+            document.querySelector("#id_image_url").value = imageUrls.join(',');
+            document.querySelector("#id_thumbnail_url").value = thumbnailUrls.join(',');
         }
         
     })

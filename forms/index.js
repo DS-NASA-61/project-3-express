@@ -37,14 +37,14 @@ const wrapForm = (form) => {
 
 const createProductForm =
     (
-        categories = [], 
-        flavor_profiles = [], 
-        brands = [], 
-        countries = [], 
+        categories = [],
+        flavor_profiles = [],
+        brands = [],
+        countries = [],
         regions = [],
         distilleries = [],
         packages = [],
-        ) => {
+    ) => {
 
         // the only arugment to forms.create is an object
         // each key defines one field in the form (one input element)
@@ -128,7 +128,7 @@ const createProductForm =
                 errorAfterField: true,
                 validators: [validators.integer()]
             }),
-    
+
             "flavor_profiles": fields.string({
                 label: 'Flavor_Profile',
                 required: true,
@@ -143,10 +143,11 @@ const createProductForm =
                 widget: forms.widgets.textarea()
             }),
             "image_url": fields.string({
-                'widget': widgets.hidden()
+                'widget': widgets.hidden(),
             }),
             "thumbnail_url": fields.string({
-                'widget': widgets.hidden()
+                'widget': widgets.hidden(),
+
             })
         })
     }
@@ -204,13 +205,13 @@ const createLoginForm = () => {
 }
 
 const createSearchForm = (
-    categories = [], 
-    flavor_profiles = [], 
-    brands = [], 
-    countries = [], 
+    categories = [],
+    flavor_profiles = [],
+    brands = [],
+    countries = [],
     regions = [],
     distilleries = []
-    ) =>{
+) => {
     return forms.create({
         "brand_id": fields.string({
             label: 'Brand',
@@ -248,32 +249,32 @@ const createSearchForm = (
         }),
         'min_age': fields.string({
             required: false,
-            errorAfterField:true,
+            errorAfterField: true,
             validators: [validators.integer()]
         }),
         'max_age': fields.string({
             required: false,
-            errorAfterField:true,
+            errorAfterField: true,
             validators: [validators.integer()]
         }),
         'min_cost': fields.string({
             required: false,
-            errorAfterField:true,
+            errorAfterField: true,
             validators: [validators.integer()]
         }),
         'max_cost': fields.string({
             required: false,
-            errorAfterField:true,
+            errorAfterField: true,
             validators: [validators.integer()]
         }),
         'min_strength': fields.string({
             required: false,
-            errorAfterField:true,
+            errorAfterField: true,
             validators: [validators.integer()]
         }),
         'max_strength': fields.string({
             required: false,
-            errorAfterField:true,
+            errorAfterField: true,
             validators: [validators.integer()]
         }),
         "flavor_profiles": fields.string({
@@ -282,7 +283,7 @@ const createSearchForm = (
             widget: widgets.multipleSelect(),
             choices: flavor_profiles
         }),
-        
+
     })
 }
 

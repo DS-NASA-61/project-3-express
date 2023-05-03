@@ -85,6 +85,69 @@ async function getProductImage() {
     return allProductImages;
 }
 
+// async function getProductImage(productId) {
+//     const product = await getProductById(productId);
+//     const productImages = await product.related('product_image').fetch();
+//     return productImages;
+// }
+
+async function getProductImageByProductId(productId) {
+    // Return the product_image associated with the given product ID
+    return await Product_Image.where({ product_id: productId }).fetch();
+}
+
+async function updateProductImage(productId, imageUrls, thumbnailUrls) {
+    // try {
+    //     // Fetch existing images for the product
+    // const existingImages = await Product_Image.where({ product_id: productId }).fetchAll();
+
+    // // Update the existing images with the new image and thumbnail URLs
+    // for (let i = 0; i < existingImages.models.length; i++) {
+    //     console.log("Updating existing image:", existingImages.models[i]);
+    //     const updatedProductImage = existingImages.at(i);
+    //     updatedProductImage.set('image_url', imageUrls[i]);
+    //     updatedProductImage.set('thumbnail_url', thumbnailUrls[i] || '');
+    //     await updatedProductImage.save();
+    //     console.log("updatedProductImage:",updatedProductImage)
+    // }
+
+    // // If there are more new images than existing images, create new ProductImage instances and save them to the database
+    // for (let i = existingImages.models.length; i < imageUrls.length; i++) {
+    //     console.log("Adding new image:", imageUrls[i]);
+    //     const newProductImage = new Product_Image({
+    //         product_id: productId,
+    //         image_url: imageUrls[i],
+    //         thumbnail_url: thumbnailUrls[i]  || '',
+    //     });
+    //     await newProductImage.save();
+    // }
+    // console.log('imageUrls:', imageUrls);
+    // console.log('thumbnailUrls:', thumbnailUrls);
+    // } catch (error) {
+    //     console.log(error)
+    // }
+    
+    try {
+        // Delete all existing images for the product
+        const existingImages = await Product_Image.where({ product_id: productId }).destroy();
+
+        // Create new images for all the URLs
+        for (let i = 0; i < imageUrls.length; i++) {
+            console.log("dal: 136: Adding new image->", imageUrls[i]);
+            const newProductImage = new Product_Image({
+                product_id: productId,
+                image_url: imageUrls[i],
+                thumbnail_url: thumbnailUrls[i] || '',
+            });
+            await newProductImage.save();
+            console.log('dal: 145: newProductImage->', newProductImage);
+        }
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 async function getProductThumbnail() {
     const allProductThumbnails = (await Product_Image.fetchAll()).map((image) => {
         return [image.get('id'), image.get('thumbnail_url')]
@@ -181,7 +244,7 @@ async function searchProducts(formData) {
         }
     }
 
-    
+
     // .fetch() -- execute the query
     const products = await searchQuery.fetch({
         withRelated: ['category', 'flavor_profiles', 'brand', 'country', 'region', 'package', 'distillery', 'product_image']
@@ -210,5 +273,7 @@ module.exports = {
     createNewProductImage,
     getProductThumbnail,
     getAllProducts,
-    searchProducts
+    searchProducts,
+    getProductImageByProductId,
+    updateProductImage
 }

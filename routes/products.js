@@ -1,4 +1,5 @@
 const express = require('express');
+const cloudinary = require('cloudinary');
 const { Product, Category, Brand, Country, Region, Product_Image } = require('../models');
 const { createProductForm, bootstrapField, wrapForm, createSearchForm } = require('../forms');
 const { getAllCategories,
@@ -14,7 +15,9 @@ const { getAllCategories,
     getAllDistilleries,
     getAllPackages,
     createNewProductImage,
-    searchProducts
+    searchProducts,
+    updateProductImage,
+    getProductImageByProductId
 } = require('../dal/products');
 const { checkIfAuthenticated } = require('../middlewares');
 const router = express.Router();
@@ -31,9 +34,9 @@ router.get('/', async (req, res) => {
             getAllRegions(),
             getAllDistilleries()
         ]);
-    
+
         const allArrays = [allCategories, allFlavorProfiles, allBrandNames, allCountries, allRegions, allDistilleries];
-    
+
         allArrays.forEach((array) => {
             if (array === allFlavorProfiles) {
                 array.unshift([0, "All"]);
@@ -41,38 +44,34 @@ router.get('/', async (req, res) => {
                 array.unshift([0, "------"]);
             }
         });
-    
+
         const searchForm = createSearchForm(
             ...allArrays
         );
-    
+
         // the query to fetch EVERYTHING
         // let searchQuery = Product.collection(); // => SELECT * FROM products WHERE 1
-    
+
         searchForm.handle(req, {
             "success": async function (form) {
-                
+
                 let products = await searchProducts(form.data);
                 res.render('products/index', {
                     'products': products,
                     'form': wrapForm(form),
                 })
             },
-    
-            "empty": async function(form){
-                const products = await searchQuery.fetch({
-                    withRelated: ['category', 'flavor_profiles', 'brand', 'country', 'region', 'package', 'distillery', 'product_image']
-                });
+
+            "empty": async function (form) {
+                let products = await searchProducts(form.data);
                 res.render('products/index', {
                     'products': products,
                     'form': wrapForm(form),
                 })
             },
-    
-            "error":  async function(form){
-                const products = await searchQuery.fetch({
-                    withRelated: ['category', 'flavor_profiles', 'brand', 'country', 'region', 'package', 'distillery', 'product_image']
-                });
+
+            "error": async function (form) {
+                let products = await searchProducts(form.data);
                 res.render('products/index', {
                     'products': products,
                     'form': wrapForm(form),
@@ -173,9 +172,21 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
                 // Product model and one or more FlavorProfile models. and is for many to 
                 // many relationship
 
-                if (form.data.image_url) {
-                    const productImage = await createNewProductImage(form.data.image_url, form.data.thumbnail_url, product.id)
-                    await productImage.save({ product_id: product.id }, { patch: true });
+                if (form.data.image_url && form.data.thumbnail_url) {
+
+                    const imageUrls = form.data.image_url.split(',');
+                    const thumbnailUrls = form.data.thumbnail_url.split(',');
+
+                    for (let i = 0; i < imageUrls.length; i++) {
+                        const imageUrl = imageUrls[i];
+                        const thumbnailUrl = thumbnailUrls[i];
+                        const productImage = await createNewProductImage(imageUrl, thumbnailUrl, product.id);
+                        await productImage.save({ product_id: product.id }, { patch: true });
+
+                        console.log("productImage==>", productImage)
+                    }
+
+
                 }
 
 
@@ -244,18 +255,8 @@ router.get('/:productId/update', async (req, res) => {
         allProductImages,
         allProductThumbnails);
 
-    // //get the productForm : the hard way
-    // productForm.fields.name.value = product.get('name');
-    // productForm.fields.age.value = product.get('age');
-    // productForm.fields.cost.value = product.get('cost');
-    // productForm.fields.strength.value = product.get('strength');
-    // productForm.fields.volume.value = product.get('volume');
-    // productForm.fields.description.value = product.get('description')
-    // productForm.fields.stock.value = product.get('stock');
-    // productForm.fields.category_id.value = product.get('category_id');
-
     // get the productForm : the simplified way -- using a loop
-    const fieldToGet = ['name', 'age', 'cost', 'strength', 'volume', 'description', 'stock', 'category_id'];
+    const fieldToGet = ['name', 'age', 'cost', 'strength', 'volume', 'description', 'stock', 'category_id', 'brand_id', 'country_id', 'region_id', 'distillery_id', 'package_id'];
     fieldToGet.forEach(field => {
         productForm.fields[field].value = product.get(field);
     })
@@ -266,13 +267,32 @@ router.get('/:productId/update', async (req, res) => {
     // put the selectedFlavorProfiles into the product fields
     productForm.fields.flavor_profiles.value = selectedFlavorProfiles;
 
-    // get all the selected images of the product
-    // let selectedProductImages = await product.related('product_image').toJSON();
-    // productForm.fields.product_image.value = selectedProductImages;
+    // Add the image_urls field to the list of fields to get
+    fieldToGet.push('image_url');
+
+
+
+    // Get all the selected images of the product using the relationship
+    let selectedProductImages = await product.related('product_image').toJSON();
+
+
+    // Initialize an empty array to store image URLs
+    let imageUrls = [];
+    let thumbnailUrls = [];
+
+    // Loop through selectedProductImages and push the image_url to imageUrls array
+    selectedProductImages.forEach(image => {
+        imageUrls.push(image.image_url);
+        thumbnailUrls.push(image.thumbnail_url);
+    });
+
+    // Set the value of the image_urls field in the productForm
+    productForm.fields.image_url.value = imageUrls;
+
 
     res.render('products/update', {
         'product': product.toJSON(),
-        'form': wrapForm(form),
+        'form': wrapForm(productForm),
         'cloudinaryName': process.env.CLOUDINARY_NAME,
         'cloudinaryApiKey': process.env.CLOUDINARY_API_KEY,
         'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
@@ -280,52 +300,142 @@ router.get('/:productId/update', async (req, res) => {
 })
 
 router.post('/:productId/update', async function (req, res) {
+    try {
+        const productForm = createProductForm();
 
-    const productForm = createProductForm();
+        const product = await getProductById(req.params.productId);
 
-    const product = await getProductById(req.params.productId);
+        productForm.handle(req, {
+            "success": async (form) => {
 
-    productForm.handle(req, {
-        "success": async (form) => {
+                const { flavor_profiles, image_url, thumbnail_url, ...productData } = form.data; //destructuring and rest operator
+                console.log('312:Form data update->', form.data);
+                // handle image
+                const imageUrls = image_url.split(',');
+                const thumbnailUrls = thumbnail_url.split(',');
 
-            const { flavor_profiles, ...productData } = form.data; //destructuring and rest operator
+                // upload new image and update product_image table
+                const newImageUrls = [];
+                const newThumbnailUrls = [];
 
-            await updateProduct(product, productData);
+                for (const imageUrl of imageUrls) {
+                    // Check if the image URL is already in the existingImages array
+                    const existingImages = product.related('product_image').toJSON();
+                    const isExistingImage = existingImages.some(existingImage => existingImage.image_url === imageUrl);
 
-            // begin the synchronization of tags
-            const incomingFlavorProfiles = flavor_profiles.split(',');
-            const existingFlavorProfiles = await product.related('flavor_profiles').pluck('id');
-            // find flavor_profiles to remove
-            let toRemove = existingFlavorProfiles.filter(t => incomingFlavorProfiles.includes(t) === false);
-            await product.flavor_profiles().detach(toRemove);
-            // find flavor_profiles to add
-            let toAdd = incomingFlavorProfiles.filter(t => existingFlavorProfiles.includes(t) === false);
-            await product.flavor_profiles().attach(toAdd)
+                    // If it's not an existing image, upload it to Cloudinary
+                    if (!isExistingImage) {
+                        try {
+                            const response = await cloudinary.uploader.upload(imageUrl, {
+                                folder: 'products',
+                                overwrite: true,
+                                resource_type: 'auto',
+                                tags: ['product_image']
+                            });
+                            console.log("route:335:response->",response)
+                            newImageUrls.push(response.secure_url);
+                            newThumbnailUrls.push(response.thumbnail_url);
+                        } catch (error) {
+                            console.error(error.message);
+                        }
+                    } else {
+                        // If it's an existing image, add its URL and thumbnail URL to the new arrays
+                        newImageUrls.push(imageUrl);
+                        const existingImage = existingImages.find(existingImage => existingImage.image_url === imageUrl);
+                        newThumbnailUrls.push(existingImage.thumbnail_url);
+                    }
+                }
+                console.log("347: newImageUrls-->", newImageUrls)
 
-            res.redirect('/products');
+                // Update the product_images table with the new image and thumbnail URLs
+                await updateProductImage(req.params.productId, newImageUrls, newThumbnailUrls);
 
-        },
-        "empty": async (form) => {
-            res.render('products/update', {
-                'form': wrapForm(form),
-                'cloudinaryName': process.env.CLOUDINARY_NAME,
-                'cloudinaryApiKey': process.env.CLOUDINARY_API_KEY,
-                'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
-            })
+                // Fetch the related product images after updating the product_images table
+                const updatedProductImages = await getProductImage(req.params.productId);
+                product.related('product_image').set(updatedProductImages);
 
-        },
-        "error": async (form) => {
-            res.render('products/update', {
-                'form': wrapForm(form),
-                'cloudinaryName': process.env.CLOUDINARY_NAME,
-                'cloudinaryApiKey': process.env.CLOUDINARY_API_KEY,
-                'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
-            })
-            console.log(form);
-        }
+                // Delete old images from Cloudinary and 
+                const existingImages = product.related('product_image').toJSON();
+                for (const image of existingImages) {
+                    // public ID is a unique identifier assigned by Cloudinary to each uploaded asset
+                    // to extracts the public ID of the image from the image URL by splitting 
+                    // the URL at each /, taking the last part (using pop()), and then 
+                    // splitting that part at each . and taking the first part. 
+                    // The public ID is required to delete the image from Cloudinary.
+                    const isNewImage = newImageUrls.includes(image[1]);
 
-    })
+                    if (!isNewImage) {
+                        // If it's not a new image, delete it from Cloudinary
 
+                        // const publicId = image.image_url.split('/').pop().split('.')[0];
+                        const publicId = image[1].split('/').pop().split('.')[0];
+                        await cloudinary.uploader.destroy(publicId);
+                    }
+                }
+
+                // Get the old_image_urls from the form
+                const old_image_urls = req.body.old_image_urls;
+
+                // If there are old_image_urls, delete them from the product_images table and Cloudinary
+                if (old_image_urls) {
+                    const oldImageUrlsArray = old_image_urls.split(',');
+
+                    // Delete the old images from the product_images table
+                    for (const oldImageUrl of oldImageUrlsArray) {
+                        await Product_Image.where({ image_url: oldImageUrl }).destroy();
+                    }
+
+                    // Delete the old images from Cloudinary
+                    for (const oldImageUrl of oldImageUrlsArray) {
+                        const publicId = oldImageUrl.split('/').pop().split('.')[0];
+                        await cloudinary.uploader.destroy(publicId);
+                    }
+                }
+
+                // Update the product with the other fields
+                await updateProduct(product, productData);
+
+
+                // handle flavor profiles
+                // begin the synchronization of flavor_profiles
+                const incomingFlavorProfiles = flavor_profiles.split(',');
+                const existingFlavorProfiles = await product.related('flavor_profiles').pluck('id');
+                // find flavor_profiles to remove
+                let toRemove = existingFlavorProfiles.filter(t => incomingFlavorProfiles.includes(t) === false);
+                await product.flavor_profiles().detach(toRemove);
+                // find flavor_profiles to add
+                let toAdd = incomingFlavorProfiles.filter(t => existingFlavorProfiles.includes(t) === false);
+                await product.flavor_profiles().attach(toAdd)
+
+
+
+                res.redirect('/products');
+
+            },
+            "empty": async (form) => {
+                res.render('products/update', {
+                    'form': wrapForm(form),
+                    'cloudinaryName': process.env.CLOUDINARY_NAME,
+                    'cloudinaryApiKey': process.env.CLOUDINARY_API_KEY,
+                    'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
+                })
+
+            },
+            "error": async (form) => {
+                res.render('products/update', {
+                    'form': wrapForm(form),
+                    'cloudinaryName': process.env.CLOUDINARY_NAME,
+                    'cloudinaryApiKey': process.env.CLOUDINARY_API_KEY,
+                    'cloudinaryPreset': process.env.CLOUDINARY_PRESET,
+                })
+                console.log(form);
+            }
+
+        })
+
+    } catch (error) {
+        console.log(error)
+    }
 })
 
 router.get('/:productId/delete', async function (req, res) {
