@@ -82,6 +82,10 @@ const createProductForm =
                 widget: widgets.select(),
                 choices: categories
             }),
+            "cask_type": fields.string({
+                required: false,
+                errorAfterField: true,
+            }),
             "distillery_id": fields.string({
                 label: 'Distillery',
                 required: false,
@@ -240,6 +244,10 @@ const createSearchForm = (
             required: true,
             widget: widgets.select(),
             choices: categories
+        }),
+        "cask_type": fields.string({
+            required: false,
+            errorAfterField: true,
         }),
         "distillery_id": fields.string({
             label: 'Distillery',
