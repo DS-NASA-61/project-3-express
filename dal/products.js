@@ -58,14 +58,6 @@ async function updateProduct(product, productData) {
     return product;
 }
 
-// async function createNewProductImage(image){
-//     const Product_Image = new Product_Image;
-//     image.set('image_url', image.image_url);
-//     image.set('thumbnail_url', image.thumbnail_url);
-//     await image.save();
-//     return image
-// }
-// same code but different way of writng as below
 async function createNewProductImage(imageUrl, thumbnailUrl, productId) {
     const product_image = new Product_Image({
         image_url: imageUrl,
@@ -90,42 +82,12 @@ async function getProductImage() {
 //     const productImages = await product.related('product_image').fetch();
 //     return productImages;
 // }
-
 async function getProductImageByProductId(productId) {
     // Return the product_image associated with the given product ID
     return await Product_Image.where({ product_id: productId }).fetch();
 }
 
 async function updateProductImage(productId, imageUrls, thumbnailUrls) {
-    // try {
-    //     // Fetch existing images for the product
-    // const existingImages = await Product_Image.where({ product_id: productId }).fetchAll();
-
-    // // Update the existing images with the new image and thumbnail URLs
-    // for (let i = 0; i < existingImages.models.length; i++) {
-    //     console.log("Updating existing image:", existingImages.models[i]);
-    //     const updatedProductImage = existingImages.at(i);
-    //     updatedProductImage.set('image_url', imageUrls[i]);
-    //     updatedProductImage.set('thumbnail_url', thumbnailUrls[i] || '');
-    //     await updatedProductImage.save();
-    //     console.log("updatedProductImage:",updatedProductImage)
-    // }
-
-    // // If there are more new images than existing images, create new ProductImage instances and save them to the database
-    // for (let i = existingImages.models.length; i < imageUrls.length; i++) {
-    //     console.log("Adding new image:", imageUrls[i]);
-    //     const newProductImage = new Product_Image({
-    //         product_id: productId,
-    //         image_url: imageUrls[i],
-    //         thumbnail_url: thumbnailUrls[i]  || '',
-    //     });
-    //     await newProductImage.save();
-    // }
-    // console.log('imageUrls:', imageUrls);
-    // console.log('thumbnailUrls:', thumbnailUrls);
-    // } catch (error) {
-    //     console.log(error)
-    // }
     
     try {
         // Delete all existing images for the product

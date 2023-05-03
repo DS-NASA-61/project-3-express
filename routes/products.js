@@ -227,7 +227,7 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
     })
 })
 
-router.get('/:productId/update', async (req, res) => {
+router.get('/:productId/update', checkIfAuthenticated, async (req, res) => {
 
     // fetch all the categories and flaovr profiles
     const allCategories = await getAllCategories();
@@ -299,7 +299,7 @@ router.get('/:productId/update', async (req, res) => {
     });
 })
 
-router.post('/:productId/update', async function (req, res) {
+router.post('/:productId/update', checkIfAuthenticated, async function (req, res) {
     try {
         const productForm = createProductForm();
 
@@ -438,7 +438,7 @@ router.post('/:productId/update', async function (req, res) {
     }
 })
 
-router.get('/:productId/delete', async function (req, res) {
+router.get('/:productId/delete', checkIfAuthenticated, async function (req, res) {
     const product = await Product.where({
         'id': req.params.productId
     }).fetch({
@@ -450,7 +450,7 @@ router.get('/:productId/delete', async function (req, res) {
     })
 });
 
-router.post('/:productId/delete', async function (req, res) {
+router.post('/:productId/delete', checkIfAuthenticated, async function (req, res) {
     const product = await Product.where({
         'id': req.params.productId
     }).fetch({

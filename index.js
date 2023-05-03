@@ -24,9 +24,9 @@ app.use(express.static("public"));
 wax.on(hbs.handlebars);
 wax.setLayoutPath("./views/layouts");
 
-hbs.registerHelper('log', function (value) {
-  
+hbs.registerHelper('log', function (value) { 
 });
+
 
 // enable forms
 app.use(
@@ -52,7 +52,7 @@ app.use(flash());
 
 // enable csrf (after enabling sessions)
 // EVERY POST ROUTE (every app.post or router.post) will be protected by CSRF
-app.use(csrf());
+// app.use(csrf());
 
 // use our own proxy mdidleware to initialize csrf selectively
 // (i.e so that we can exclude certain routes from csrf)
@@ -79,13 +79,6 @@ app.use(function (err, req, res, next) {
   }
 });
 
-// once csfr is initialized, csrfToken() method will be ready to use to generate token
-//share CSRF token with hbs files
-app.use(function (req, res, next) {
-  res.locals.csrfToken = req.csrfToken();
-  next();
-})
-
 // use our own custom middleware to extract flash messages
 // by setting properties on res.locals (in 
 // this case `success` and `errors` event),
@@ -100,17 +93,29 @@ app.use(function (req, res, next) {
   next();
 });
 
-// this global middleware is to add user data across all hbs files
+// this global middlewarreq.csrfTokene is to add user data across all hbs files
 // sets the user property of res.locals to the user property of req.session
 app.use(function (req, res, next) {
   res.locals.user = req.session.user;
   next();
 });
 
+
 // register the Handlebars helper
 hbs.registerHelper('cloudinaryImageUrl', function (publicId, options) {
   return cloudinaryImageUrl(publicId, options.hash);
 });
+
+// once csfr is initialized, csrfToken() method will be ready to use to generate token
+// share the csrf token with all hbs files
+app.use(function (req, res, next) {
+  // when we do app.use(csrf()), it adds the csrfToken function to req
+  if (req.csrfToken) {
+    res.locals.csrfToken = req.csrfToken();
+  }
+
+  next();
+})
 
 
 // import in the router
@@ -122,6 +127,8 @@ const cloudinaryRoutes = require('./routes/cloudinary.js');
 const cartRoutes = require('./routes/cart.js');
 
 const api = {
+  users: require('./routes/api/users'),
+  carts: require('./routes/api/carts'),
   products: require('./routes/api/products.js')
 };
 
@@ -143,6 +150,9 @@ async function main() {
 
   //API routes
   app.use('/api/products', express.json(), api.products)
+  app.use('/api/users', express.json(), api.users);
+  app.use('/api/carts', express.json(), api.carts);
+
 }
 
 main();
