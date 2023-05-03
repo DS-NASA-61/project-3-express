@@ -47,7 +47,6 @@ const generateToken = (user, secret, expiresIn) => {
 
 // --- signup ---
 router.post('/signup', async (req, res) => {
-    console.log("Reached signup route"); ;
 
     try {
 

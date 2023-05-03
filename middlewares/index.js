@@ -16,15 +16,20 @@ const checkIfAuthenticatedWithJWT = (req,res,next) =>{
         const token = authHeader.split(' ')[1];
         jwt.verify(token, process.env.TOKEN_SECRET, function(err,user){
             if (err) {
+                console.log("JWT verification error:", err.message);
                 res.sendStatus(403);
+
             } else {
                 // save the current user in the session
                 req.user = user;
                 next();
+                
             }
         })
     } else {
+        
         res.sendStatus(401);
+        
     }
 }
 
