@@ -52,8 +52,6 @@ router.post('/signup', async (req, res) => {
 
         const { first_name, last_name, username, email, password, contact_number } = req.body;
 
-        console.log("req.body-->",req.body);
-
         if (!validator.isLength(first_name, { min: 1, max: 100 })) {
             return res.status(400).json({ error: 'First Name must be between 1 and 100 characters long' });
         }
@@ -142,7 +140,7 @@ router.post('/refresh', async (req, res) => {
             } else {
 
                 // check if the refresh token has been blacklisted
-                const blacklistedToken = BlacklistedToken.where({
+                const blacklistedToken =  BlacklistedToken.where({
                     'token': refreshToken
                 }).fetch({
                     require: false

@@ -309,7 +309,7 @@ router.post('/:productId/update', checkIfAuthenticated, async function (req, res
             "success": async (form) => {
 
                 const { flavor_profiles, image_url, thumbnail_url, ...productData } = form.data; //destructuring and rest operator
-                console.log('312:Form data update->', form.data);
+                
                 // handle image
                 const imageUrls = image_url.split(',');
                 const thumbnailUrls = thumbnail_url.split(',');
@@ -332,7 +332,7 @@ router.post('/:productId/update', checkIfAuthenticated, async function (req, res
                                 resource_type: 'auto',
                                 tags: ['product_image']
                             });
-                            console.log("route:335:response->",response)
+                            
                             newImageUrls.push(response.secure_url);
                             newThumbnailUrls.push(response.thumbnail_url);
                         } catch (error) {
