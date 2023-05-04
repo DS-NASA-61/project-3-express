@@ -295,6 +295,111 @@ const createSearchForm = (
     })
 }
 
+
+const createOrderForm = (orderStatuses = []) => {
+    return forms.create({
+        'order_status_id': fields.string({
+            label: 'Order status',
+            required: true,
+            errorAfterField: true,
+            choices: orderStatuses,
+            widget: widgets.select(),
+        }),
+        'order_date': fields.date({
+            widget: widgets.hidden()
+        }),
+        'shipping_address_line1': fields.string({
+            label: "Shipping Address Line1",
+            required: true,
+            errorAfterField: true,
+        }),
+        'shipping_address_postal': fields.string({
+            label: "Shipping Address Line2",
+            required: true,
+            errorAfterField: true,
+        }),
+        'shipping_postal_code': fields.string({
+            label: "Postal Code",
+            required: false,
+            errorAfterField: true,
+        }),
+        'delivery_date': fields.date({
+            required: false,
+            errorAfterField: true,
+            widget: widgets.date(),
+            validators: [
+                function (form, field, callback) {
+                    if (form.data.delivery_date && field.data < form.data.order_date) {
+                        callback(
+                            `Please enter a date after order date ${form.data.order_date}`
+                        );
+                    } else {
+                        callback();
+                    }
+                }
+            ]
+        })
+    });
+}
+
+const createOrderSearchForm = (orderStatuses = []) => {
+    return forms.create({
+        'order_id': fields.string({
+            required: false,
+            errorAfterField: true
+        }),
+        'username': fields.string({
+            required: false,
+            errorAfterField: true,
+        }),
+        'user_email': fields.string({
+            required: false,
+            errorAfterField: true,
+        }),
+        'order_date_from': fields.date({
+            required: false,
+            errorAfterField: true,
+            widget: widgets.date(),
+            validators: [
+                function (form, field, callback) {
+                    if (form.data.order_date_to && field.data > form.data.order_date_to) {
+                        callback(
+                            'Please enter a date before "order date to"'
+                        );
+                    } else {
+                        callback();
+                    }
+                }
+            ]
+        }),
+        'order_date_to': fields.date({
+            required: false,
+            errorAfterField: true,
+            widget: widgets.date(),
+            validators: [
+                function (form, field, callback) {
+                    if (form.data.order_date_from && field.data < form.data.order_date_from) {
+                        callback(
+                            'Please enter date after "order date from"'
+                        );
+                    } else {
+                        callback();
+                    }
+                }
+            ]
+        }),
+        'order_status_id': fields.string({
+            label: 'Order status',
+            required: false,
+            errorAfterField: true,
+            widget: widgets.select(),
+            choices: orderStatuses
+        }),
+    });
+}
+
+
+
 module.exports =
 {
     wrapForm,
@@ -302,6 +407,8 @@ module.exports =
     createProductForm,
     createRegistrationForm,
     createLoginForm,
-    createSearchForm
+    createSearchForm,
+    createOrderForm,
+    createOrderSearchForm
 }
 

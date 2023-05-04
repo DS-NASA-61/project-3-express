@@ -16,28 +16,28 @@ const Product = bookshelf.model('Product', {
     flavor_profiles() {
         return this.belongsToMany('Flavor_Profile');
     },
-    brand(){
+    brand() {
         return this.belongsTo('Brand')
     },
-    product_image(){
+    product_image() {
         return this.hasMany('Product_Image')
     },
-    country(){
+    country() {
         return this.belongsTo('Country')
     },
-    region(){
+    region() {
         return this.belongsTo('Region')
     },
-    distillery(){
+    distillery() {
         return this.belongsTo('Distillery')
     },
-    package(){
+    package() {
         return this.belongsTo('Package')
     },
-    cart_item(){
+    cart_item() {
         return this.hasMany('Cart_Item')
     }
-    
+
 });
 
 
@@ -57,39 +57,39 @@ const Flavor_Profile = bookshelf.model('Flavor_Profile', {
     }
 })
 
-const User = bookshelf.model('User',{
+const User = bookshelf.model('User', {
     tableName: 'users'
 })
 
-const Product_Image = bookshelf.model('Product_Image',{
-    tableName:'product_images',
+const Product_Image = bookshelf.model('Product_Image', {
+    tableName: 'product_images',
     products() {
         return this.belongsTo('Product')
     }
 })
 
-const Brand = bookshelf.model('Brand',{
-    tableName:'brands',
+const Brand = bookshelf.model('Brand', {
+    tableName: 'brands',
     products() {
         return this.hasMany('Product')
     }
 })
 
-const Country = bookshelf.model('Country',{
-    tableName:'countries',
+const Country = bookshelf.model('Country', {
+    tableName: 'countries',
     products() {
         return this.hasMany('Product')
     }
 })
 
-const Region = bookshelf.model('Region',{
-    tableName:'regions',
+const Region = bookshelf.model('Region', {
+    tableName: 'regions',
     products() {
         return this.hasMany('Product')
     }
 })
 
-const Distillery = bookshelf.model('Distillery',{
+const Distillery = bookshelf.model('Distillery', {
     tableName: 'distilleries',
     products() {
         return this.hasMany('Product')
@@ -97,31 +97,61 @@ const Distillery = bookshelf.model('Distillery',{
 })
 
 const Package = bookshelf.model('Package', {
-    tableName:'packages',
+    tableName: 'packages',
     products() {
         return this.hasMany('Product')
     }
 })
 
-const Cart_Item = bookshelf.model('Cart_Item',{
-    tableName:'cart_items',
+const Cart_Item = bookshelf.model('Cart_Item', {
+    tableName: 'cart_items',
     products() {
         return this.belongsTo('Product')
     },
-    users(){
+    users() {
         return this.belongsTo('User')
     }
 })
 
-const BlacklistedToken = bookshelf.model('BlacklistedToken',{
+const BlacklistedToken = bookshelf.model('BlacklistedToken', {
     tableName: 'blacklisted_tokens'
 })
 
-module.exports = { 
-    Product, 
-    Category, 
-    Flavor_Profile, 
-    User, 
+const OrderStatus = bookshelf.model('OrderStatus', {
+    tableName: 'order_statuses',
+    orders: function () {
+        return this.hasMany('Order');
+    }
+});
+
+const Order = bookshelf.model('Order', {
+    tableName: 'orders',
+    users: function () {
+        return this.belongsTo('User');
+    },
+    orderStatus: function () {
+        return this.belongsTo('OrderStatus');
+    },
+    orderItems: function () {
+        return this.hasMany('OrderItem');
+    }
+});
+
+const OrderItem = bookshelf.model('OrderItem', {
+    tableName: 'order_items',
+    orderStatus: function () {
+        return this.belongsTo('Order');
+    },
+    products: function () {
+        return this.belongsTo('Product');
+    }
+});
+
+module.exports = {
+    Product,
+    Category,
+    Flavor_Profile,
+    User,
     Product_Image,
     Brand,
     Country,
@@ -129,5 +159,8 @@ module.exports = {
     Distillery,
     Package,
     Cart_Item,
-    BlacklistedToken
+    BlacklistedToken,
+    OrderStatus,
+    Order,
+    OrderItem
 }
